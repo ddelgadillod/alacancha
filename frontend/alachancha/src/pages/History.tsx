@@ -1,14 +1,4 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-
 export default function History() {
-  const navigate = useNavigate()
-
-  const handleClick = () => {
-    // Aquí podrías enviar datos de búsqueda a un estado global o API si quieres
-    navigate('/') // 👈 navega a la otra pantalla
-  }
 
  const historyItem = [
     { id: 1, sport: 'Fútbol', slot: 'Delantero', date: '15 de Mayo, 2023', place: 'Canchas del Sol', score: 5 },

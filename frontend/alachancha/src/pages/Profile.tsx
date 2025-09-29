@@ -1,11 +1,9 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import ProfileItem from './ProfileItem'
 import History from './History'
 
 
 export default function Profile() {
-  const navigate = useNavigate()  
   const [tab, setTab] = useState('profile');
 
   return (

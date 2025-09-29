@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spot-service
+  namespace: dev
+spec:
+  selector:
+    app: spot
+  ports:
+    - port: 3000
+      targetPort: 3000  # puerto de tu contenedor
+  type: ClusterIP

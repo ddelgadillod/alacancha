@@ -1,15 +1,4 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-
 export default function CreateSlot() {
-  const navigate = useNavigate()
-
-  const handleClick = () => {
-    // Aquí podrías enviar datos de búsqueda a un estado global o API si quieres
-    navigate('/') // 👈 navega a la otra pantalla
-  }
-
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
       <div className="w-full h-100 flex flex-col p-6 ">
@@ -24,7 +13,7 @@ export default function CreateSlot() {
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"> sports_soccer </span>
             <select className="form-select w-full rounded-lg border border-gray-600 bg-gray-800 py-3 pl-12 pr-10 text-base text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50">
-              <option selected="">Fútbol</option>
+              <option>Fútbol</option>
               <option>Baloncesto</option>
               <option>Béisbol</option>
             </select>

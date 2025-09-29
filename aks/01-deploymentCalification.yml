@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: calification-service
+  namespace: dev
+spec:
+  selector:
+    app: calification
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calification
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calification
+  template:
+    metadata:
+      labels:
+        app: calification
+    spec:
+      containers:
+      - name: calification
+        image: acralacancha.azurecr.io/calification:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: DB_HOST
+          value: "db-alacancha.postgres.database.azure.com"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "db-alacancha"
+        - name: DB_USER
+          value: "servicio_calification"
+        - name: DB_SSL
+          value: "true"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-secrets
+              key: DB_PASSWORD

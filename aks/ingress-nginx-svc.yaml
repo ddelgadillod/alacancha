@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2025-09-29T00:30:48Z"
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  name: ingress-nginx-controller
+  namespace: ingress-basic
+  resourceVersion: "139603"
+  uid: 6bbdae08-8cac-41b7-8774-e410f9a824ab
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 10.0.218.46
+  clusterIPs:
+  - 10.0.218.46
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  loadBalancerIP: 20.245.171.115
+  ports:
+  - name: http
+    nodePort: 30446
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - name: https
+    nodePort: 30447
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 20.245.171.115
+      ipMode: VIP

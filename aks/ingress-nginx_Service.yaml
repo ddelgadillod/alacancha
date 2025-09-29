@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ingress-nginx
+  namespace: ingress-basic
+spec:
+  loadBalancerIP: 20.245.171.115
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+      nodePort: 30446
+    - protocol: TCP
+      port: 443
+      targetPort: https
+      nodePort: 30447
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster

@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 // Rutas del microservicio
-app.use('/api/spot', authRoutes);
+app.use('', authRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Auth microservice running on port ${PORT}`));

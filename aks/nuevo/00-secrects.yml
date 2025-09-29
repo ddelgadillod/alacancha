@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auth-secrets
+  namespace: dev        # asegúrate de usar el mismo namespace que tu Deployment
+type: Opaque
+stringData:
+  DB_PASSWORD: "Manhole-Struck-Femur-Dreaded9"

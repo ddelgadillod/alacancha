@@ -1,18 +1,5 @@
-import React, { useState } from 'react'
 
 export default function Search() {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<string[]>([])
-
-  const items = ['Manzana', 'Banano', 'Fresa', 'Uva', 'Mango']
-
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault()
-    const filtered = items.filter(item =>
-      item.toLowerCase().includes(query.toLowerCase())
-    )
-    setResults(filtered)
-  }
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
@@ -25,7 +12,7 @@ export default function Search() {
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"> sports_soccer </span>
                 <select className="form-select w-full rounded-lg border border-gray-600 bg-gray-800 py-3 pl-12 pr-10 text-base text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50">
-                  <option selected="">Fútbol</option>
+                  <option>Fútbol</option>
                   <option>Baloncesto</option>
                   <option>Béisbol</option>
                 </select>

@@ -1,14 +1,4 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-
 export default function ProfileItem() {
-  const navigate = useNavigate()
-
-  const handleClick = () => {
-    // Aquí podrías enviar datos de búsqueda a un estado global o API si quieres
-    navigate('/') // 👈 navega a la otra pantalla
-  }
 
   return (
     <div className="w-full flex flex-col overflow-hidden">
@@ -21,7 +11,7 @@ export default function ProfileItem() {
               </button>
           </div>
           <div className="mt-4 w-full space-y-2">
-            <label className="flex w-full cursor-pointer items-center justify-center rounded-lg h-11 px-4 bg-gray-700 text-white text-sm font-medium transition-colors hover:bg-gray-600" for="photo-upload">
+            <label className="flex w-full cursor-pointer items-center justify-center rounded-lg h-11 px-4 bg-gray-700 text-white text-sm font-medium transition-colors hover:bg-gray-600">
               <span className="material-symbols-outlined mr-2 text-base"> cloud_upload </span>
               <span>Subir Foto</span>
             </label>
@@ -46,9 +36,9 @@ export default function ProfileItem() {
             <input className="form-input w-full rounded-lg border border-gray-600 bg-gray-800 py-3 pl-12 pr-4 text-base text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50" placeholder="Horarios Disponibles" type="text"/>
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <label className="text-base text-gray-400" for="search-radius">Radio de Búsqueda: <span className="font-bold text-white" id="radius-value">25 Km</span></label>
+            <label className="text-base text-gray-400">Radio de Búsqueda: <span className="font-bold text-white" id="radius-value">25 Km</span></label>
             <div className="relative">
-              <input className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb" id="search-radius" max="50" min="1" oninput="document.getElementById('radius-value').innerText = this.value + ' Km'" type="range" value="25"/>
+              <input className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb" id="search-radius" max="50" min="1" type="range" value="25"/>
             </div>
           </div>
         </div>
@@ -56,7 +46,7 @@ export default function ProfileItem() {
           <h3 className="text-lg font-medium text-white">Deportes de Interés</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <label className="flex items-center space-x-3 cursor-pointer">
-              <input checked="" className="form-checkbox h-5 w-5 rounded bg-gray-700 border-gray-600 text-[var(--primary-color)] focus:ring-[var(--primary-color)]" type="checkbox"/>
+              <input className="form-checkbox h-5 w-5 rounded bg-gray-700 border-gray-600 text-[var(--primary-color)] focus:ring-[var(--primary-color)]" type="checkbox"/>
                 <span className="text-white">Fútbol</span>
             </label>
             <label className="flex items-center space-x-3 cursor-pointer">

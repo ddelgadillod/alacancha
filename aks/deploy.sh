@@ -9,12 +9,11 @@ docker push $IMAGE
 SERVICE=spot
 VERSION=latest
 IMAGE=acralacancha.azurecr.io/$SERVICE:$VERSION
-docker build -t $IMAGE ../$SERVICE/ls
-
+docker build -t $IMAGE ../$SERVICE/
 docker push $IMAGE
 
 #calificacion
-SERVICE=calificacion
+SERVICE=calification
 VERSION=latest
 IMAGE=acralacancha.azurecr.io/$SERVICE:$VERSION
 docker build -t $IMAGE ../$SERVICE/

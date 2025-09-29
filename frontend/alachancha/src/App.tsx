@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import Search from './pages/Search'
@@ -9,7 +7,6 @@ import Profile from './pages/Profile'
 import CreateSlot from './pages/CreateSlot'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <Routes>

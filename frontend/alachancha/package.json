@@ -13,6 +13,7 @@
     "@tailwindcss/cli": "^4.1.13",
     "@tailwindcss/vite": "^4.1.13",
     "@vis.gl/react-google-maps": "^1.5.5",
+    "axios": "^1.12.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.2"

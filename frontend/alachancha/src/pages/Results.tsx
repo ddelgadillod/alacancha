@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
 import { APIProvider, Map, Marker, useMap  } from '@vis.gl/react-google-maps';
 import Reserve from './Reserve';
+import { useLocation } from 'react-router-dom';
 
-function FitBounds({ markers }: { markers: { position: google.maps.LatLngLiteral }[] }) {
+function FitBounds({ markers }: { markers: { lat:number, lon:number }[] }) {
   const map = useMap(); // obtiene el objeto google.maps.Map
 
   React.useEffect(() => {
     if (!map || markers.length === 0) return;
 
     const bounds = new google.maps.LatLngBounds();
-    markers.forEach(m => bounds.extend(m.position));
+    markers.forEach(m => bounds.extend({ lat: m.lat, lng: m.lon }));
 
     // Ajusta el mapa a los marcadores
     map.fitBounds(bounds);
@@ -18,18 +19,28 @@ function FitBounds({ markers }: { markers: { position: google.maps.LatLngLiteral
   return null; // no renderiza nada, solo ejecuta la lógica
 }
 
+export interface MarkerStruct {
+  id: number
+  lat: number
+  lon: number
+  lugar: string
+  fecha: string  // o Date si manejas objetos Date
+}
+
 export default function Results() {
   const [selectedMarker, setSelectedMarker] = useState<null | {
     id: number
-    title: string
-    reserva : string
+    lugar: string
+    fecha : string
   }>(null);
-
+  const location = useLocation();
+  const markers = location.state;
+  debugger;
   // Marcadores de ejemplo
-  const markers = [
+  /* const markers = [
     { id: 1, position: { lat: 6.252, lng: -75.56 }, title: 'Cancha 1', reserva: 'Reserva de 8:00 a 9:00 AM' },
     { id: 2, position: { lat: 6.255, lng: -74.565 }, title: 'Cancha 2', reserva: 'Reserva de 10:00 a 11:00 AM' },
-  ]
+  ] */
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden">
@@ -48,13 +59,15 @@ export default function Results() {
               disableDefaultUI={true}
             >
               {
-              markers.map(({id, position, title, reserva }) => {
+              markers.map(({id, lat, lon, lugar, fecha }:MarkerStruct) => {
+                console.log({ lat: lat, lng: lon })
                 return (
                   <Marker
-                    position={position}
+                    key={id}
+                    position={{ lat: lat, lng: lon }}
                     clickable={true}
-                    onClick={() => setSelectedMarker({ id, title, reserva  })}
-                    title={title}
+                    onClick={() => setSelectedMarker({ id, lugar, fecha  })}
+                    title={lugar}
                   />
                 )
               })}
