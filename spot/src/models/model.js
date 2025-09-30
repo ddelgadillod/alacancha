@@ -159,31 +159,31 @@ async buscarCupos(filtros, limite) {
     const valores = [];
     let paramIndex = 1;
     
-    // Filtro OBLIGATORIO por deporte (ya normalizado en controller)
+
     query += ` AND deporte = $${paramIndex++}`;
     valores.push(deporte);
     
-    // Filtro OPCIONAL por precio máximo
+   
     if (precio !== null && precio !== undefined) {
       query += ` AND valor <= $${paramIndex++}`;
       valores.push(precio);
     }
     
-    // Filtro OPCIONAL por fecha y hora hasta
+
     if (fecha) {
       if (hora) {
-        // Filtrar por fecha y hora específica
+  
         query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex}::date AND hora <= $${paramIndex + 1}::time))`;
         valores.push(fecha, hora);
         paramIndex += 2;
       } else {
-        // Solo filtrar por fecha
+
         query += ` AND fecha <= $${paramIndex++}`;
         valores.push(fecha);
       }
     }
     
-    // Filtro OPCIONAL por ubicación (radio)
+ 
     if (ubicacion) {
       query += ` 
         AND lat IS NOT NULL 
@@ -202,10 +202,10 @@ async buscarCupos(filtros, limite) {
       paramIndex += 3;
     }
     
-    // Ordenar por fecha y hora ascendente (más próximos primero)
+  
     query += ` ORDER BY fecha ASC, hora ASC`;
     
-    // Aplicar límite
+  
     query += ` LIMIT $${paramIndex}`;
     valores.push(limite);
     

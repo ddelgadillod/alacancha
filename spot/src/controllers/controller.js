@@ -146,8 +146,8 @@ function normalizarDeporte(deporte) {
   
   return deporte
     .toLowerCase()
-    .normalize('NFD') // Descomponer caracteres con acentos
-    .replace(/[\u0300-\u036f]/g, '') // Eliminar marcas diacríticas
+    .normalize('NFD') 
+    .replace(/[\u0300-\u036f]/g, '') 
     .trim();
 }
 
@@ -174,9 +174,7 @@ function validarFechaHora(fecha, hora = null) {
 
 export async function buscarCupos(req, res) {
   try {
-    // ==========================================
-    // 1. EXTRAER Y VALIDAR PARÁMETROS
-    // ==========================================
+
     
     const deporte = req.query.deporte;
     const precio = req.query.precio;
@@ -187,9 +185,7 @@ export async function buscarCupos(req, res) {
     const radio = req.query.radio;
     const limite = req.query.limite || 10;
     
-    // ==========================================
-    // 2. VALIDACIÓN: DEPORTE OBLIGATORIO
-    // ==========================================
+    
     
     if (!deporte || deporte.trim() === '') {
       return res.status(400).json({
@@ -197,7 +193,7 @@ export async function buscarCupos(req, res) {
       });
     }
     
-    // Normalizar deporte (minúsculas, sin acentos)
+    
     const deporteNormalizado = normalizarDeporte(deporte);
     
     if (!deporteNormalizado) {
@@ -206,9 +202,7 @@ export async function buscarCupos(req, res) {
       });
     }
     
-    // ==========================================
-    // 3. VALIDACIÓN: LÍMITE DE RESULTADOS
-    // ==========================================
+
     
     const limiteNum = parseInt(limite);
     
@@ -224,9 +218,7 @@ export async function buscarCupos(req, res) {
       });
     }
     
-    // ==========================================
-    // 4. VALIDACIÓN: PRECIO MÁXIMO (OPCIONAL)
-    // ==========================================
+
     
     let precioMaximo = null;
     
@@ -240,9 +232,7 @@ export async function buscarCupos(req, res) {
       }
     }
     
-    // ==========================================
-    // 5. VALIDACIÓN: FECHA Y HORA HASTA (OPCIONAL)
-    // ==========================================
+  
     
     let fechaHastaValida = null;
     let horaHastaValida = null;
@@ -257,17 +247,15 @@ export async function buscarCupos(req, res) {
       }
       
       fechaHastaValida = fecha;
-      horaHastaValida = hora || '23:59:59'; // Si no se especifica hora, hasta el final del día
+      horaHastaValida = hora || '23:59:59'; 
     }
     
-    // ==========================================
-    // 6. VALIDACIÓN: UBICACIÓN (OPCIONAL)
-    // ==========================================
+
     
     let ubicacion = null;
     
     if (lat || lon || radio) {
-      // Si se proporciona algún parámetro de ubicación, todos son requeridos
+
       if (!lat || !lon || !radio) {
         return res.status(400).json({
           error: 'Para búsqueda por ubicación se requieren: lat, lon y radio'
@@ -303,9 +291,7 @@ export async function buscarCupos(req, res) {
       };
     }
     
-    // ==========================================
-    // 7. CONSTRUIR OBJETO DE FILTROS VALIDADOS
-    // ==========================================
+
     
     const filtros = {
       deporte: deporteNormalizado,
@@ -315,15 +301,11 @@ export async function buscarCupos(req, res) {
       ubicacion: ubicacion
     };
     
-    // ==========================================
-    // 8. LLAMAR AL MODELO CON DATOS VALIDADOS
-    // ==========================================
+
     
     const cupos = await Spot.buscarCupos(filtros, limiteNum);
     
-    // ==========================================
-    // 9. RESPONDER CON RESULTADOS
-    // ==========================================
+
     
     res.json({
       success: true,
@@ -353,9 +335,7 @@ export async function participarEnCupo(req, res) {
       const { cupoId,
               usuarioId
        } = req.body;
-//validar que cupo exista
 
-//registrar participacion
       const rol = 'jugador';
 
       if (!cupoId || isNaN(cupoId)) {
