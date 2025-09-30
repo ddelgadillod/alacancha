@@ -10,7 +10,7 @@ import { participarEnCupo } from '../controllers/controller.js';
 const router = Router();
 
 router.post('/findspot', findSpot);
-router.post('/historial', getHistorialParticipacion);
+router.get('/historial', getHistorialParticipacion);
 router.post('/crearcupos', crearCupo);
 router.get('/buscarcupos', buscarCupos);
 router.get('/obtenercupos', obtenerCupo);

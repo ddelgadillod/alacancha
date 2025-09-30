@@ -22,7 +22,7 @@ const result = await pool.query(queryConfig);
 
   async getHistorialByUser(usuarioId) {
     const queryConfig = {
-      text: `
+    text: `
       SELECT 
         p.id as participacion_id,
         p.rol,
@@ -41,7 +41,9 @@ const result = await pool.query(queryConfig);
         c.creado_en as cupo_creado_en
       FROM spot.participaciones p
       INNER JOIN spot.cupos c ON p.cupo_id = c.id
-      WHERE p.usuario_id=$1::integer`,
+      WHERE p.usuario_id = $1::integer
+      ORDER BY c.fecha DESC, c.hora DESC
+    `,      
       values: [usuarioId]
     };
       
@@ -159,30 +161,39 @@ async buscarCupos(filtros, limite) {
     const valores = [];
     let paramIndex = 1;
     
-
+    // Filtro OBLIGATORIO por deporte
     query += ` AND deporte = $${paramIndex++}`;
     valores.push(deporte);
     
-   
+    // Filtro OPCIONAL por precio máximo
     if (precio !== null && precio !== undefined) {
       query += ` AND valor <= $${paramIndex++}`;
       valores.push(precio);
     }
     
-
-if (fecha) {
-  if (hora) {
-    // Filtrar por fecha y hora específica
-    query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex + 1}::date AND hora <= $${paramIndex + 2}::time))`;
-    valores.push(fecha, fecha, hora);
-    paramIndex += 3;
-  } else {
-    // Solo filtrar por fecha (hasta el final del día)
-    query += ` AND fecha <= $${paramIndex++}::date`;
-    valores.push(fecha);
-  }
-}
- 
+    // Filtros por fecha y/o hora (INDEPENDIENTES)
+    if (fecha && hora) {
+      // CASO 1: Fecha Y hora especificadas
+      // Mostrar cupos hasta esa fecha, y en cada día solo hasta esa hora
+      query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex + 1}::date AND hora <= $${paramIndex + 2}::time))`;
+      valores.push(fecha, fecha, hora);
+      paramIndex += 3;
+      
+    } else if (fecha) {
+      // CASO 2: Solo fecha especificada (sin importar si hora existe o no)
+      // Mostrar cupos hasta esa fecha, cualquier hora
+      query += ` AND fecha <= $${paramIndex++}::date`;
+      valores.push(fecha);
+      
+    } else if (hora) {
+      // CASO 3: Solo hora especificada (sin importar si fecha existe o no)
+      // Mostrar cupos hasta esa hora, cualquier fecha
+      query += ` AND hora <= $${paramIndex++}::time`;
+      valores.push(hora);
+    }
+    // CASO 4: Ni fecha ni hora - muestra todos (sin filtro adicional)
+    
+    // Filtro OPCIONAL por ubicación (radio)
     if (ubicacion) {
       query += ` 
         AND lat IS NOT NULL 
@@ -201,10 +212,11 @@ if (fecha) {
       paramIndex += 3;
     }
     
-  
+    // Ordenar del más reciente al más distante (CORREGIDO)
+    // Primero los más próximos en el tiempo
     query += ` ORDER BY fecha ASC, hora ASC`;
     
-  
+    // Aplicar límite
     query += ` LIMIT $${paramIndex}`;
     valores.push(limite);
     
@@ -219,8 +231,6 @@ if (fecha) {
     throw error;
   }
 },
-
-
   async participarEnCupo(cupoId, usuarioId, rol = 'jugador') {
     const client = await pool.connect();
     try {

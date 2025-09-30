@@ -19,9 +19,13 @@ export async function findSpot(req, res) {
 };
 
 export async function getHistorialParticipacion(req, res) {
-  const usuarioId = req.body.usuarioId || null;
 
-    console.log(usuarioId);
+  //const usuarioId = req.query.usuarioId || null;
+  const usuarioId = 3;
+
+
+
+  console.log(usuarioId);
 
   try {
 
@@ -104,7 +108,7 @@ export async function crearCupo(req, res) {
 
 export async function obtenerCupo(req, res) {
     try {
-      const id = req.body.id || null;
+      const id = req.query.id || null;
 
       if (!id || isNaN(id)) {
         return res.status(400).json({
@@ -174,18 +178,22 @@ function validarFechaHora(fecha, hora = null) {
 
 export async function buscarCupos(req, res) {
   try {
-
+    // ==========================================
+    // 1. EXTRAER PARÁMETROS
+    // ==========================================
     
     const deporte = req.query.deporte;
     const precio = req.query.precio;
-    const fecha = req.query.fecha;
-    const hora = req.query.hora;
+    const fecha = req.query.fecha;  // Sin condicionar por hora
+    const hora = req.query.hora;    // Sin condicionar por fecha
     const lat = req.query.lat;
     const lon = req.query.lon;
     const radio = req.query.radio;
     const limite = req.query.limite || 10;
     
-    
+    // ==========================================
+    // 2. VALIDACIÓN: DEPORTE OBLIGATORIO
+    // ==========================================
     
     if (!deporte || deporte.trim() === '') {
       return res.status(400).json({
@@ -193,7 +201,7 @@ export async function buscarCupos(req, res) {
       });
     }
     
-    
+    // Normalizar deporte (minúsculas, sin acentos)
     const deporteNormalizado = normalizarDeporte(deporte);
     
     if (!deporteNormalizado) {
@@ -202,7 +210,9 @@ export async function buscarCupos(req, res) {
       });
     }
     
-
+    // ==========================================
+    // 3. VALIDACIÓN: LÍMITE DE RESULTADOS
+    // ==========================================
     
     const limiteNum = parseInt(limite);
     
@@ -218,7 +228,9 @@ export async function buscarCupos(req, res) {
       });
     }
     
-
+    // ==========================================
+    // 4. VALIDACIÓN: PRECIO MÁXIMO (OPCIONAL)
+    // ==========================================
     
     let precioMaximo = null;
     
@@ -232,30 +244,51 @@ export async function buscarCupos(req, res) {
       }
     }
     
-  
+    // ==========================================
+    // 5. VALIDACIÓN: FECHA (OPCIONAL - INDEPENDIENTE)
+    // ==========================================
     
-    let fechaHastaValida = null;
-    let horaHastaValida = null;
+    let fechaValida = null;
     
     if (fecha) {
-      const validacion = validarFechaHora(fecha, hora);
+      const validacionFecha = validarFechaHora(fecha);
       
-      if (!validacion.valido) {
+      if (!validacionFecha.valido) {
         return res.status(400).json({
-          error: validacion.error
+          error: validacionFecha.error
         });
       }
       
-      fechaHastaValida = fecha;
-      horaHastaValida = hora || '23:59:59'; 
+      fechaValida = fecha;
     }
     
-
+    // ==========================================
+    // 6. VALIDACIÓN: HORA (OPCIONAL - INDEPENDIENTE)
+    // ==========================================
+    
+    let horaValida = null;
+    
+    if (hora) {
+      const validacionHora = validarFechaHora('2024-01-01', hora); // Fecha dummy para validar solo hora
+      
+      if (!validacionHora.valido) {
+        return res.status(400).json({
+          error: validacionHora.error
+        });
+      }
+      
+      // Normalizar formato de hora (agregar :00 si falta)
+      horaValida = hora.length === 5 ? `${hora}:00` : hora;
+    }
+    
+    // ==========================================
+    // 7. VALIDACIÓN: UBICACIÓN (OPCIONAL)
+    // ==========================================
     
     let ubicacion = null;
     
     if (lat || lon || radio) {
-
+      // Si se proporciona algún parámetro de ubicación, todos son requeridos
       if (!lat || !lon || !radio) {
         return res.status(400).json({
           error: 'Para búsqueda por ubicación se requieren: lat, lon y radio'
@@ -291,21 +324,27 @@ export async function buscarCupos(req, res) {
       };
     }
     
-
+    // ==========================================
+    // 8. CONSTRUIR OBJETO DE FILTROS VALIDADOS
+    // ==========================================
     
     const filtros = {
       deporte: deporteNormalizado,
       precio: precioMaximo,
-      fecha: fechaHastaValida,
-      hora: horaHastaValida,
+      fecha: fechaValida,        // Independiente de hora
+      hora: horaValida,          // Independiente de fecha
       ubicacion: ubicacion
     };
     
-
+    // ==========================================
+    // 9. LLAMAR AL MODELO CON DATOS VALIDADOS
+    // ==========================================
     
     const cupos = await Spot.buscarCupos(filtros, limiteNum);
     
-
+    // ==========================================
+    // 10. RESPONDER CON RESULTADOS
+    // ==========================================
     
     res.json({
       success: true,
@@ -314,8 +353,8 @@ export async function buscarCupos(req, res) {
       filtros_aplicados: {
         deporte: deporteNormalizado,
         precio_maximo: precioMaximo,
-        fecha: fechaHastaValida,
-        hora: horaHastaValida,
+        fecha_hasta: fechaValida,
+        hora_hasta: horaValida,
         ubicacion: ubicacion ? `${ubicacion.lat}, ${ubicacion.lon} (${ubicacion.radio_km}km)` : null
       },
       cupos
