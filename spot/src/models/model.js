@@ -135,90 +135,91 @@ async obtenerParticipacionesCupo(cupoId) {
     }
   },
 
-  async buscarCupos(filtros, limite = 50, offset = 0) {
-    try {
-      const {
-        deporte,
-        valor_min,
-        valor_max,
-        fecha_desde,
-        fecha_hasta,
-        lat,
-        lon,
-        radio_km,
-        estado = 'pendiente'
-      } = filtros;
-      console.log('Buscar cupos con filtros:', filtros);
-
-      let query = `
-        SELECT id, creador_id, deporte, valor, duracion, lugar, 
-               fecha, hora, lat, lon, roles, creado_en, estado
-        FROM spot.cupos 
-        WHERE estado = $1
-      `;
-      
-      const valores = [estado];
-      let paramIndex = 2;
-
-      // Filtrar por deporte
-      if (deporte) {
-        query += ` AND LOWER(deporte) = LOWER($${paramIndex++})`;
-        valores.push(deporte);
-      }
-
-      // Filtrar por rango de valor
-      if (valor_min !== undefined) {
-        query += ` AND valor >= $${paramIndex++}`;
-        valores.push(valor_min);
-      }
-
-      if (valor_max !== undefined) {
-        query += ` AND valor <= $${paramIndex++}`;
-        valores.push(valor_max);
-      }
-
-      // Filtrar por rango de fechas
-      if (fecha_desde) {
-        query += ` AND fecha >= $${paramIndex++}`;
-        valores.push(fecha_desde);
-      }
-
-      if (fecha_hasta) {
-        query += ` AND fecha <= $${paramIndex++}`;
-        valores.push(fecha_hasta);
-      }
-
-      // Filtrar por ubicación (radio)
-      if (lat !== undefined && lon !== undefined && radio_km) {
-        query += ` 
-          AND lat IS NOT NULL 
-          AND lon IS NOT NULL
-          AND (
-            6371 * acos(
-              cos(radians($${paramIndex++})) * 
-              cos(radians(lat)) * 
-              cos(radians(lon) - radians($${paramIndex++})) + 
-              sin(radians($${paramIndex++})) * 
-              sin(radians(lat))
-            )
-          ) <= $${paramIndex++}
-        `;
-        valores.push(lat, lon, lat, radio_km);
-      }
-
-      query += ` ORDER BY fecha ASC, hora ASC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
-      valores.push(limite, offset);
-      console.log('Final Query:', query);
-      console.log('With values:', valores);
-
-      const result = await pool.query(query, valores);
-      return result.rows;
-
-    } catch (error) {
-      throw error;
+async buscarCupos(filtros, limite) {
+  try {
+    const {
+      deporte,
+      precio,
+      fecha,
+      hora,
+      ubicacion
+    } = filtros;
+    
+    console.log('Buscar cupos con filtros validados:', filtros);
+    
+    // Query base: solo cupos pendientes
+    let query = `
+      SELECT 
+        id, creador_id, deporte, valor, duracion, lugar, 
+        fecha, hora, lat, lon, roles, creado_en, estado
+      FROM cupos 
+      WHERE estado = 'pendiente'
+    `;
+    
+    const valores = [];
+    let paramIndex = 1;
+    
+    // Filtro OBLIGATORIO por deporte (ya normalizado en controller)
+    query += ` AND deporte = $${paramIndex++}`;
+    valores.push(deporte);
+    
+    // Filtro OPCIONAL por precio máximo
+    if (precio !== null && precio !== undefined) {
+      query += ` AND valor <= $${paramIndex++}`;
+      valores.push(precio);
     }
-  },
-
+    
+    // Filtro OPCIONAL por fecha y hora hasta
+    if (fecha) {
+      if (hora) {
+        // Filtrar por fecha y hora específica
+        query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex}::date AND hora <= $${paramIndex + 1}::time))`;
+        valores.push(fecha, hora);
+        paramIndex += 2;
+      } else {
+        // Solo filtrar por fecha
+        query += ` AND fecha <= $${paramIndex++}`;
+        valores.push(fecha);
+      }
+    }
+    
+    // Filtro OPCIONAL por ubicación (radio)
+    if (ubicacion) {
+      query += ` 
+        AND lat IS NOT NULL 
+        AND lon IS NOT NULL
+        AND (
+          6371 * acos(
+            cos(radians($${paramIndex})) * 
+            cos(radians(lat)) * 
+            cos(radians(lon) - radians($${paramIndex + 1})) + 
+            sin(radians($${paramIndex})) * 
+            sin(radians(lat))
+          )
+        ) <= $${paramIndex + 2}
+      `;
+      valores.push(ubicacion.lat, ubicacion.lon, ubicacion.radio_km);
+      paramIndex += 3;
+    }
+    
+    // Ordenar por fecha y hora ascendente (más próximos primero)
+    query += ` ORDER BY fecha ASC, hora ASC`;
+    
+    // Aplicar límite
+    query += ` LIMIT $${paramIndex}`;
+    valores.push(limite);
+    
+    console.log('Query ejecutada:', query);
+    console.log('Valores:', valores);
+    
+    const result = await pool.query(query, valores);
+    return result.rows;
+    
+  } catch (error) {
+    console.error('Error en buscarCupos model:', error);
+    throw error;
+  }
+},
 
 
   async participarEnCupo(cupoId, usuarioId, rol = 'jugador') {
