@@ -170,19 +170,18 @@ async buscarCupos(filtros, limite) {
     }
     
 
-    if (fecha) {
-      if (hora) {
-  
-        query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex}::date AND hora <= $${paramIndex + 1}::time))`;
-        valores.push(fecha, hora);
-        paramIndex += 2;
-      } else {
-
-        query += ` AND fecha <= $${paramIndex++}`;
-        valores.push(fecha);
-      }
-    }
-    
+if (fecha) {
+  if (hora) {
+    // Filtrar por fecha y hora específica
+    query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex + 1}::date AND hora <= $${paramIndex + 2}::time))`;
+    valores.push(fecha, fecha, hora);
+    paramIndex += 3;
+  } else {
+    // Solo filtrar por fecha (hasta el final del día)
+    query += ` AND fecha <= $${paramIndex++}::date`;
+    valores.push(fecha);
+  }
+}
  
     if (ubicacion) {
       query += ` 
@@ -238,45 +237,7 @@ async buscarCupos(filtros, limite) {
       client.release();
     }
   },
-/*      if (cupoResult.rows.length === 0) {
-        throw new Error('Cupo no encontrado');
-      }
 
-      const cupo = cupoResult.rows[0];
-//revisar estado
-      if (cupo.estado !== 'pendiente') {
-        throw new Error('No se puede participar en este cupo');
-      }
-
-      if (cupo.creador_id === usuarioId) {
-        throw new Error('No puedes participar en tu propio cupo');
-      }
-*/
-      // Verificar si ya está participando
-      //const yaParticipaQuery = 'SELECT id FROM spot.participaciones WHERE cupo_id = $1 AND usuario_id = $2';
-      //const yaParticipaResult = await client.query(yaParticipaQuery, [cupoId, usuarioId]);
-
-      //if (yaParticipaResult.rows.length > 0) {
-      //  throw new Error('Ya estás participando en este cupo');
-      //}
-
-      // Verificar disponibilidad de roles si se especifica
-      /*if (cupo.roles && rol !== 'jugador') {
-        const rolesDisponibles = JSON.parse(cupo.roles);
-        
-        if (rolesDisponibles[rol] !== undefined) {
-          // Contar participaciones actuales en este rol
-          const countRolQuery = 'SELECT COUNT(*) as count FROM spot.participaciones WHERE cupo_id = $1 AND rol = $2';
-          const countResult = await client.query(countRolQuery, [cupoId, rol]);
-          const participantesEnRol = parseInt(countResult.rows[0].count);
-          
-          if (participantesEnRol >= rolesDisponibles[rol]) {
-            throw new Error(`No hay cupos disponibles para el rol: ${rol}`);
-          }
-        }
-      }*/
-
-      // Insertar participación
 
   async actualizarEstadoCupo(cupoId) { 
     const client = await pool.connect();
