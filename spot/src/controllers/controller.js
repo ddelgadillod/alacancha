@@ -141,76 +141,201 @@ export async function obtenerCupo(req, res) {
     }
   }
 
+function normalizarDeporte(deporte) {
+  if (!deporte) return null;
+  
+  return deporte
+    .toLowerCase()
+    .normalize('NFD') 
+    .replace(/[\u0300-\u036f]/g, '') 
+    .trim();
+}
+
+// Función auxiliar para validar fecha y hora
+function validarFechaHora(fecha, hora = null) {
+  const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
+  const regexHora = /^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+  
+  if (!regexFecha.test(fecha)) {
+    return { valido: false, error: 'Formato de fecha inválido. Use YYYY-MM-DD' };
+  }
+  
+  const date = new Date(fecha);
+  if (isNaN(date.getTime())) {
+    return { valido: false, error: 'Fecha inválida' };
+  }
+  
+  if (hora && !regexHora.test(hora)) {
+    return { valido: false, error: 'Formato de hora inválido. Use HH:MM o HH:MM:SS' };
+  }
+  
+  return { valido: true };
+}
+
 export async function buscarCupos(req, res) {
-    try {
-      const deporte = req.query.deporte || null;
-      const valor_min = req.query.valor_min || null;
-      const valor_max = req.query.valor_max || null;
-      const fecha_desde = req.query.fecha_desde || null;
-      const fecha_hasta = req.query.fecha_hasta || null;
-      const lat = req.query.lat || null;
-      const lon = req.query.lon || null;
-      const radio = req.query.radio || 10;
-      const limite = req.query.limite || 50;
-      const offset = req.query.offset || 0;
+  try {
 
-      /*const {
-        deporte,
-        valor_min,
-        valor_max,
-        fecha_desde,
-        fecha_hasta,
-        lat,
-        lon,
-        radio = 10,
-        limite = 50,
-        offset = 0
-      } = req.body;
-      */
-      const filtros = {};
-
-      if (deporte) filtros.deporte = deporte;
-      if (valor_min) filtros.valor_min = parseFloat(valor_min);
-      if (valor_max) filtros.valor_max = parseFloat(valor_max);
-      if (fecha_desde) filtros.fecha_desde = fecha_desde;
-      if (fecha_hasta) filtros.fecha_hasta = fecha_hasta;
-      
-      if (lat && lon) {
-        filtros.lat = parseFloat(lat);
-        filtros.lon = parseFloat(lon);
-        filtros.radio_km = parseFloat(radio);
-      }
-
-      const cupos = await Spot.buscarCupos(
-        filtros, 
-        parseInt(limite), 
-        parseInt(offset)
-      );
-
-      res.json({
-        success: true,
-        cupos,
-        total: cupos.length,
-        filtros
-      });
-
-    } catch (error) {
-      console.error('Error al buscar cupos:', error);
-      res.status(500).json({
-        error: 'Error interno del servidor',
-        detalle: error.message
+    
+    const deporte = req.query.deporte;
+    const precio = req.query.precio;
+    const fecha = req.query.fecha;
+    const hora = req.query.hora;
+    const lat = req.query.lat;
+    const lon = req.query.lon;
+    const radio = req.query.radio;
+    const limite = req.query.limite || 10;
+    
+    
+    
+    if (!deporte || deporte.trim() === '') {
+      return res.status(400).json({
+        error: 'El parámetro "deporte" es obligatorio'
       });
     }
+    
+    
+    const deporteNormalizado = normalizarDeporte(deporte);
+    
+    if (!deporteNormalizado) {
+      return res.status(400).json({
+        error: 'Deporte inválido después de normalización'
+      });
+    }
+    
+
+    
+    const limiteNum = parseInt(limite);
+    
+    if (isNaN(limiteNum) || limiteNum < 1) {
+      return res.status(400).json({
+        error: 'El límite debe ser un número positivo'
+      });
+    }
+    
+    if (limiteNum > 10) {
+      return res.status(400).json({
+        error: 'El límite máximo es 10 resultados'
+      });
+    }
+    
+
+    
+    let precioMaximo = null;
+    
+    if (precio) {
+      precioMaximo = parseFloat(precio);
+      
+      if (isNaN(precioMaximo) || precioMaximo < 0) {
+        return res.status(400).json({
+          error: 'El precio debe ser un número positivo'
+        });
+      }
+    }
+    
+  
+    
+    let fechaHastaValida = null;
+    let horaHastaValida = null;
+    
+    if (fecha) {
+      const validacion = validarFechaHora(fecha, hora);
+      
+      if (!validacion.valido) {
+        return res.status(400).json({
+          error: validacion.error
+        });
+      }
+      
+      fechaHastaValida = fecha;
+      horaHastaValida = hora || '23:59:59'; 
+    }
+    
+
+    
+    let ubicacion = null;
+    
+    if (lat || lon || radio) {
+
+      if (!lat || !lon || !radio) {
+        return res.status(400).json({
+          error: 'Para búsqueda por ubicación se requieren: lat, lon y radio'
+        });
+      }
+      
+      const latNum = parseFloat(lat);
+      const lonNum = parseFloat(lon);
+      const radioNum = parseFloat(radio);
+      
+      if (isNaN(latNum) || latNum < -90 || latNum > 90) {
+        return res.status(400).json({
+          error: 'Latitud inválida. Debe estar entre -90 y 90'
+        });
+      }
+      
+      if (isNaN(lonNum) || lonNum < -180 || lonNum > 180) {
+        return res.status(400).json({
+          error: 'Longitud inválida. Debe estar entre -180 y 180'
+        });
+      }
+      
+      if (isNaN(radioNum) || radioNum <= 0 || radioNum > 100) {
+        return res.status(400).json({
+          error: 'Radio inválido. Debe ser entre 1 y 100 kilómetros'
+        });
+      }
+      
+      ubicacion = {
+        lat: latNum,
+        lon: lonNum,
+        radio_km: radioNum
+      };
+    }
+    
+
+    
+    const filtros = {
+      deporte: deporteNormalizado,
+      precio: precioMaximo,
+      fecha: fechaHastaValida,
+      hora: horaHastaValida,
+      ubicacion: ubicacion
+    };
+    
+
+    
+    const cupos = await Spot.buscarCupos(filtros, limiteNum);
+    
+
+    
+    res.json({
+      success: true,
+      total: cupos.length,
+      limite: limiteNum,
+      filtros_aplicados: {
+        deporte: deporteNormalizado,
+        precio_maximo: precioMaximo,
+        fecha: fechaHastaValida,
+        hora: horaHastaValida,
+        ubicacion: ubicacion ? `${ubicacion.lat}, ${ubicacion.lon} (${ubicacion.radio_km}km)` : null
+      },
+      cupos
+    });
+    
+  } catch (error) {
+    console.error('Error al buscar cupos:', error);
+    res.status(500).json({
+      error: 'Error interno del servidor',
+      detalle: error.message
+    });
   }
+}
 
 export async function participarEnCupo(req, res) {
     try {
       const { cupoId,
               usuarioId
        } = req.body;
-//validar que cupo exista
 
-//registrar participacion
       const rol = 'jugador';
 
       if (!cupoId || isNaN(cupoId)) {
