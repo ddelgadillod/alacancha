@@ -16,5 +16,5 @@ docker push $IMAGE
 SERVICE=calification
 VERSION=latest
 IMAGE=acralacancha.azurecr.io/$SERVICE:$VERSION
-docker build -t $IMAGE ../$SERVICE/
+docker build -t $IMAGE ../calificacion/
 docker push $IMAGE
