@@ -21,10 +21,7 @@ export async function findSpot(req, res) {
 export async function getHistorialParticipacion(req, res) {
 
   const usuarioId = req.query.usuarioId || null;
-<<<<<<< HEAD
   //const usuarioId = 3;
-=======
->>>>>>> b150bc18ae041b5538ce4d46e238234d520d21fa
 
 
 
