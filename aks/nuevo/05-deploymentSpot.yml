@@ -23,11 +23,11 @@ spec:
         - name: PORT
           value: "3000"
         - name: DB_HOST
-          value: "db-alacancha.postgres.database.azure.com"
+          value: "alacancha.postgres.database.azure.com"
         - name: DB_PORT
           value: "5432"
         - name: DB_NAME
-          value: "db-alacancha"
+          value: "alacancha"
         - name: DB_USER
           value: "servicio_spot"
         - name: DB_SSL

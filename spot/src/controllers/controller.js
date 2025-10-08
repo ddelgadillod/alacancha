@@ -20,8 +20,8 @@ export async function findSpot(req, res) {
 
 export async function getHistorialParticipacion(req, res) {
 
-  //const usuarioId = req.query.usuarioId || null;
-  const usuarioId = 3;
+  const usuarioId = req.query.usuarioId || null;
+  //const usuarioId = 3;
 
 
 

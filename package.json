@@ -4,7 +4,8 @@
   "description": "App para convocar jugadores en partidos amistosos en tu ciudad",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"npm run dev --prefix auth\" \"npm run dev --prefix calificacion\""
   },
   "keywords": [],
   "author": "",
