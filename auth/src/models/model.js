@@ -11,7 +11,7 @@ const User = {
 
   async findByUsername(username) {
     const result = await pool.query(
-      'SELECT * FROM usuarios WHERE username = $1',
+      'SELECT * FROM usuarios WHERE correo = $1',
       [username]
     );
     return result.rows[0];

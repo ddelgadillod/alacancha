@@ -1,4 +1,5 @@
 import User from '../models/model.js';
+import bcrypt from 'bcrypt';
 
 export async function registerUser(req, res) {
   const { username, password } = req.body;
@@ -13,7 +14,9 @@ export async function registerUser(req, res) {
 export async function loginUser(req, res) {
   const { username, password } = req.body;
   const user = await User.findByUsername(username);
-  if (user && user.password === password) {
+  console.log(user.contrasena)
+  const esValida = await bcrypt.compare(password, user["contraseña_hash"]);
+  if (esValida) {
     res.json({ message: 'Login successful' });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
@@ -53,10 +56,12 @@ export async function crearPerfil(req, res) {
       });
     }
 
+    const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 = saltRounds
+
     const usuario = await User.crearPerfil({
       nombre: nombre.trim(),
       correo: correo.trim().toLowerCase(),
-      contrasena,
+      contrasena: hashedPassword,
       deportes_preferidos: deportes_preferidos || [],
       horario_disponible: horario_disponible || [],
       lat: lat ? parseFloat(lat) : null,
