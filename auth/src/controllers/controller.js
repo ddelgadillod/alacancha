@@ -17,7 +17,7 @@ export async function loginUser(req, res) {
   console.log(user.contrasena)
   const esValida = await bcrypt.compare(password, user["contraseña_hash"]);
   if (esValida) {
-    res.json({ message: 'Login successful' });
+    res.json({ message: 'Login successful', userid: user.id });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
   }

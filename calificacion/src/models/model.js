@@ -13,7 +13,7 @@ const Calificacion = {
           cal.comentario,
           cal.fecha,
           cal.cupo_id
-        FROM calificaciones cal
+        FROM calificacion.calificaciones cal
         WHERE cal.evaluado_id = $1
         ORDER BY cal.fecha DESC
       `,

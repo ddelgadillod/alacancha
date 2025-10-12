@@ -41,19 +41,57 @@ const result = await pool.query(queryConfig);
         c.creado_en as cupo_creado_en
       FROM spot.participaciones p
       INNER JOIN spot.cupos c ON p.cupo_id = c.id
-      WHERE p.usuario_id = $1::integer
+      WHERE p.usuario_id = $1::integer OR c.creador_id = $1::integer
       ORDER BY c.fecha DESC, c.hora DESC
     `,      
       values: [usuarioId]
     };
-      
-
-
-    console.log('Query historial:', queryConfig);
-    console.log('Values:', usuarioId);
 
     const result = await pool.query(queryConfig);
-    return result.rows;
+    const historial = result.rows;
+
+    // Obtener calificaciones para todos los cupos encontrados
+    const cupoIds = historial.map(h => h.cupo_id);
+    if (cupoIds.length === 0) return [];
+
+    const calificacionesQuery = {
+      text: `
+        SELECT 
+          id,
+          evaluador_id,
+          evaluado_id,
+          puntaje,
+          comentario,
+          fecha,
+          cupo_id
+        FROM calificacion.calificaciones
+        WHERE cupo_id = ANY($1::int[])
+        ORDER BY fecha DESC
+      `,
+      values: [cupoIds],
+    };
+
+    const calificacionesResult = await pool.query(calificacionesQuery);
+    const calificaciones = calificacionesResult.rows;
+
+
+     // Agrupar calificaciones por cupo_id
+    const calificacionesPorCupo = {};
+    for (const cal of calificaciones) {
+      if (!calificacionesPorCupo[cal.cupo_id]) {
+        calificacionesPorCupo[cal.cupo_id] = [];
+      }
+      calificacionesPorCupo[cal.cupo_id].push(cal);
+    }
+
+    // Combinar historial con calificaciones
+    const historialConCalificaciones = historial.map(item => ({
+      ...item,
+      calificaciones: calificacionesPorCupo[item.cupo_id] || [],
+    }));
+
+    return historialConCalificaciones;
+
   },
 
   async crearCupo(datos) {
@@ -154,7 +192,7 @@ async buscarCupos(filtros, limite) {
       SELECT 
         id, creador_id, deporte, valor, duracion, lugar, 
         fecha, hora, lat, lon, roles, creado_en, estado
-      FROM cupos 
+      FROM spot.cupos 
       WHERE estado = 'pendiente'
     `;
     
