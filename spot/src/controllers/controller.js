@@ -39,7 +39,6 @@ export async function getHistorialParticipacion(req, res) {
 
 export async function crearCupo(req, res) {
   try {
-    //const creador_id = req.usuario.id;
     const {
       creador_id,
       deporte,
@@ -52,59 +51,231 @@ export async function crearCupo(req, res) {
       lon,
       roles
     } = req.body;
-
-    // Validaciones
-    if (!deporte || !lugar || !fecha || !hora) {
+    
+    // ==========================================
+    // 1. VALIDAR CAMPOS OBLIGATORIOS
+    // ==========================================
+    
+    if (!creador_id) {
       return res.status(400).json({
-        error: 'Faltan campos obligatorios: deporte, lugar, fecha, hora'
+        error: 'El ID del creador es obligatorio'
       });
     }
-
-    // Validar fecha no sea en el pasado
-    const fechaCupo = new Date(`${fecha}T${hora}`);
+    
+    if (!deporte || deporte.trim() === '') {
+      return res.status(400).json({
+        error: 'El deporte es obligatorio'
+      });
+    }
+    
+    if (valor === undefined || valor === null) {
+      return res.status(400).json({
+        error: 'El valor es obligatorio'
+      });
+    }
+    
+    if (!duracion) {
+      return res.status(400).json({
+        error: 'La duración es obligatoria'
+      });
+    }
+    
+    if (!lugar || lugar.trim() === '') {
+      return res.status(400).json({
+        error: 'El lugar es obligatorio'
+      });
+    }
+    
+    if (!fecha) {
+      return res.status(400).json({
+        error: 'La fecha es obligatoria'
+      });
+    }
+    
+    if (!hora) {
+      return res.status(400).json({
+        error: 'La hora es obligatoria'
+      });
+    }
+    
+    if (!roles) {
+      return res.status(400).json({
+        error: 'Los roles son obligatorios'
+      });
+    }
+    
+    // ==========================================
+    // 2. VALIDAR TIPOS Y FORMATOS
+    // ==========================================
+    
+    // Validar y normalizar deporte
+    const deporteNormalizado = normalizarDeporte(deporte);
+    if (!deporteNormalizado) {
+      return res.status(400).json({
+        error: 'Deporte inválido'
+      });
+    }
+    
+    // Validar valor
+    const valorNum = parseFloat(valor);
+    if (isNaN(valorNum) || valorNum < 0) {
+      return res.status(400).json({
+        error: 'El valor debe ser un número positivo o cero'
+      });
+    }
+    
+    // Validar duración
+    const duracionNum = parseInt(duracion);
+    if (isNaN(duracionNum) || duracionNum <= 0) {
+      return res.status(400).json({
+        error: 'La duración debe ser un número positivo (minutos)'
+      });
+    }
+    
+    if (duracionNum > 480) { // Máximo 8 horas
+      return res.status(400).json({
+        error: 'La duración máxima es 480 minutos (8 horas)'
+      });
+    }
+    
+    // Validar fecha y hora
+    const validacionFechaHora = validarFechaHora(fecha, hora);
+    if (!validacionFechaHora.valido) {
+      return res.status(400).json({
+        error: validacionFechaHora.error
+      });
+    }
+    
+    // Validar que sea en el futuro
+    const fechaHoraCupo = new Date(`${fecha}T${hora}`);
     const ahora = new Date();
     
-    if (fechaCupo <= ahora) {
+    if (fechaHoraCupo <= ahora) {
       return res.status(400).json({
         error: 'La fecha y hora del cupo debe ser en el futuro'
       });
     }
-
-    // Validar coordenadas si se envían
+    
+    // Validar coordenadas
     if ((lat && !lon) || (!lat && lon)) {
       return res.status(400).json({
-        error: 'lat y lon deben proporcionarse juntos'
+        error: 'Latitud y longitud deben proporcionarse juntas'
       });
     }
-
+    
+    let latNum = null;
+    let lonNum = null;
+    
+    if (lat && lon) {
+      latNum = parseFloat(lat);
+      lonNum = parseFloat(lon);
+      
+      if (isNaN(latNum) || latNum < -90 || latNum > 90) {
+        return res.status(400).json({
+          error: 'Latitud inválida. Debe estar entre -90 y 90'
+        });
+      }
+      
+      if (isNaN(lonNum) || lonNum < -180 || lonNum > 180) {
+        return res.status(400).json({
+          error: 'Longitud inválida. Debe estar entre -180 y 180'
+        });
+      }
+    }
+    
+    // ==========================================
+    // 3. VALIDAR ROLES
+    // ==========================================
+    
+    let rolesObj;
+    
+    try {
+      // Si viene como string, parsearlo
+      rolesObj = typeof roles === 'string' ? JSON.parse(roles) : roles;
+    } catch (error) {
+      return res.status(400).json({
+        error: 'Formato de roles inválido. Debe ser un objeto JSON'
+      });
+    }
+    
+    if (typeof rolesObj !== 'object' || Array.isArray(rolesObj) || rolesObj === null) {
+      return res.status(400).json({
+        error: 'Los roles deben ser un objeto con formato: {"rol1": cantidad, "rol2": cantidad}'
+      });
+    }
+    
+    const rolesKeys = Object.keys(rolesObj);
+    
+    if (rolesKeys.length === 0) {
+      return res.status(400).json({
+        error: 'Debe definir al menos un rol'
+      });
+    }
+    
+    // Validar cada rol
+    for (const rol of rolesKeys) {
+      const cantidad = rolesObj[rol];
+      
+      if (typeof cantidad !== 'number' || cantidad < 1 || !Number.isInteger(cantidad)) {
+        return res.status(400).json({
+          error: `La cantidad para el rol "${rol}" debe ser un número entero positivo`
+        });
+      }
+      
+      if (cantidad > 20) {
+        return res.status(400).json({
+          error: `La cantidad máxima por rol es 20 (rol: "${rol}")`
+        });
+      }
+    }
+    
+    const totalCupos = Object.values(rolesObj).reduce((a, b) => a + b, 0);
+    
+    if (totalCupos > 50) {
+      return res.status(400).json({
+        error: 'El total de cupos no puede exceder 50'
+      });
+    }
+    
+    // ==========================================
+    // 4. CREAR CUPO
+    // ==========================================
+    
+    // Formatear duración para PostgreSQL INTERVAL
+    const duracionInterval = `${duracionNum} minutes`;
+    
     const cupo = await Spot.crearCupo({
       creador_id,
-      deporte: deporte.trim(),
-      valor: valor ? parseFloat(valor) : null,
-      duracion : duracion ? parseInt(duracion) + "minutes" : null,
+      deporte: deporteNormalizado,
+      valor: valorNum,
+      duracion: duracionInterval,
       lugar: lugar.trim(),
       fecha,
       hora,
-      lat: lat ? parseFloat(lat) : null,
-      lon: lon ? parseFloat(lon) : null,
-      roles
+      lat: latNum,
+      lon: lonNum,
+      roles: rolesObj
     });
-
+    
+    // ==========================================
+    // 5. RESPONDER
+    // ==========================================
+    
     res.status(201).json({
       success: true,
       mensaje: 'Cupo creado exitosamente',
       cupo
     });
-
+    
   } catch (error) {
     console.error('Error al crear cupo:', error);
+    
     res.status(500).json({
       error: 'Error interno del servidor',
       detalle: error.message
     });
   }
 }
-
 
 export async function obtenerCupo(req, res) {
     try {
@@ -184,34 +355,47 @@ export async function buscarCupos(req, res) {
     
     const deporte = req.query.deporte;
     const precio = req.query.precio;
-    const fecha = req.query.fecha;  // Sin condicionar por hora
-    const hora = req.query.hora;    // Sin condicionar por fecha
+    const fecha = req.query.fecha;
+    const hora = req.query.hora;
     const lat = req.query.lat;
     const lon = req.query.lon;
     const radio = req.query.radio;
     const limite = req.query.limite || 10;
     
     // ==========================================
-    // 2. VALIDACIÓN: DEPORTE OBLIGATORIO
+    // 2. VALIDACIÓN: AL MENOS UN CRITERIO OBLIGATORIO
     // ==========================================
     
-    if (!deporte || deporte.trim() === '') {
+    if (!deporte && !precio && !fecha) {
       return res.status(400).json({
-        error: 'El parámetro "deporte" es obligatorio'
-      });
-    }
-    
-    // Normalizar deporte (minúsculas, sin acentos)
-    const deporteNormalizado = normalizarDeporte(deporte);
-    
-    if (!deporteNormalizado) {
-      return res.status(400).json({
-        error: 'Deporte inválido después de normalización'
+        error: 'Debes proporcionar al menos uno de estos criterios: deporte, precio o fecha'
       });
     }
     
     // ==========================================
-    // 3. VALIDACIÓN: LÍMITE DE RESULTADOS
+    // 3. VALIDACIÓN Y NORMALIZACIÓN: DEPORTE (OPCIONAL pero exacto)
+    // ==========================================
+    
+    let deporteNormalizado = null;
+    
+    if (deporte) {
+      if (deporte.trim() === '') {
+        return res.status(400).json({
+          error: 'El deporte no puede estar vacío'
+        });
+      }
+      
+      deporteNormalizado = normalizarDeporte(deporte);
+      
+      if (!deporteNormalizado) {
+        return res.status(400).json({
+          error: 'Deporte inválido después de normalización'
+        });
+      }
+    }
+    
+    // ==========================================
+    // 4. VALIDACIÓN: LÍMITE DE RESULTADOS
     // ==========================================
     
     const limiteNum = parseInt(limite);
@@ -229,15 +413,15 @@ export async function buscarCupos(req, res) {
     }
     
     // ==========================================
-    // 4. VALIDACIÓN: PRECIO MÁXIMO (OPCIONAL)
+    // 5. VALIDACIÓN: PRECIO EXACTO (OPCIONAL)
     // ==========================================
     
-    let precioMaximo = null;
+    let precioExacto = null;
     
     if (precio) {
-      precioMaximo = parseFloat(precio);
+      precioExacto = parseFloat(precio);
       
-      if (isNaN(precioMaximo) || precioMaximo < 0) {
+      if (isNaN(precioExacto) || precioExacto < 0) {
         return res.status(400).json({
           error: 'El precio debe ser un número positivo'
         });
@@ -245,10 +429,10 @@ export async function buscarCupos(req, res) {
     }
     
     // ==========================================
-    // 5. VALIDACIÓN: FECHA (OPCIONAL - INDEPENDIENTE)
+    // 6. VALIDACIÓN: FECHA EXACTA (OPCIONAL)
     // ==========================================
     
-    let fechaValida = null;
+    let fechaExacta = null;
     
     if (fecha) {
       const validacionFecha = validarFechaHora(fecha);
@@ -259,17 +443,17 @@ export async function buscarCupos(req, res) {
         });
       }
       
-      fechaValida = fecha;
+      fechaExacta = fecha;
     }
     
     // ==========================================
-    // 6. VALIDACIÓN: HORA (OPCIONAL - INDEPENDIENTE)
+    // 7. VALIDACIÓN: HORA EXACTA (OPCIONAL)
     // ==========================================
     
-    let horaValida = null;
+    let horaExacta = null;
     
     if (hora) {
-      const validacionHora = validarFechaHora('2024-01-01', hora); // Fecha dummy para validar solo hora
+      const validacionHora = validarFechaHora('2024-01-01', hora);
       
       if (!validacionHora.valido) {
         return res.status(400).json({
@@ -277,18 +461,16 @@ export async function buscarCupos(req, res) {
         });
       }
       
-      // Normalizar formato de hora (agregar :00 si falta)
-      horaValida = hora.length === 5 ? `${hora}:00` : hora;
+      horaExacta = hora.length === 5 ? `${hora}:00` : hora;
     }
     
     // ==========================================
-    // 7. VALIDACIÓN: UBICACIÓN (OPCIONAL)
+    // 8. VALIDACIÓN: UBICACIÓN (OPCIONAL)
     // ==========================================
     
     let ubicacion = null;
     
     if (lat || lon || radio) {
-      // Si se proporciona algún parámetro de ubicación, todos son requeridos
       if (!lat || !lon || !radio) {
         return res.status(400).json({
           error: 'Para búsqueda por ubicación se requieren: lat, lon y radio'
@@ -325,25 +507,25 @@ export async function buscarCupos(req, res) {
     }
     
     // ==========================================
-    // 8. CONSTRUIR OBJETO DE FILTROS VALIDADOS
+    // 9. CONSTRUIR OBJETO DE FILTROS VALIDADOS
     // ==========================================
     
     const filtros = {
       deporte: deporteNormalizado,
-      precio: precioMaximo,
-      fecha: fechaValida,        // Independiente de hora
-      hora: horaValida,          // Independiente de fecha
+      precio: precioExacto,
+      fecha: fechaExacta,
+      hora: horaExacta,
       ubicacion: ubicacion
     };
     
     // ==========================================
-    // 9. LLAMAR AL MODELO CON DATOS VALIDADOS
+    // 10. LLAMAR AL MODELO CON DATOS VALIDADOS
     // ==========================================
     
     const cupos = await Spot.buscarCupos(filtros, limiteNum);
     
     // ==========================================
-    // 10. RESPONDER CON RESULTADOS
+    // 11. RESPONDER CON RESULTADOS
     // ==========================================
     
     res.json({
@@ -352,9 +534,9 @@ export async function buscarCupos(req, res) {
       limite: limiteNum,
       filtros_aplicados: {
         deporte: deporteNormalizado,
-        precio_maximo: precioMaximo,
-        fecha_hasta: fechaValida,
-        hora_hasta: horaValida,
+        precio: precioExacto,
+        fecha: fechaExacta,
+        hora: horaExacta,
         ubicacion: ubicacion ? `${ubicacion.lat}, ${ubicacion.lon} (${ubicacion.radio_km}km)` : null
       },
       cupos

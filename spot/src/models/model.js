@@ -95,68 +95,51 @@ const result = await pool.query(queryConfig);
   },
 
   async crearCupo(datos) {
-    const client = await pool.connect();
-    try {
-      const {
-        creador_id,
-        deporte,
-        valor,
-        duracion,
-        lugar,
-        fecha,
-        hora,
-        lat,
-        lon,
-        roles
-      } = datos;
-
-      const insertQuery = `
-        INSERT INTO spot.cupos (
-          creador_id, deporte, valor, duracion, lugar, 
-          fecha, hora, lat, lon, roles, estado
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pendiente')
-        RETURNING *
-      `;
-
-      const result = await client.query(insertQuery, [
-        creador_id,
-        deporte,
-        valor,
-        duracion,
-        lugar,
-        fecha,
-        hora,
-        lat,
-        lon,
-        roles ? JSON.stringify(roles) : null
-      ]);
-
-      return result.rows[0];
-
-    } catch (error) {
-      throw error;
-    } finally {
-      client.release();
-    }
-  },
-
-    async obtenerCupoPorId(id) {
-    try {
-      const query = `
-        SELECT id, creador_id, deporte, valor, duracion, lugar, 
-               fecha, hora, lat, lon, roles, creado_en, estado
-        FROM spot.cupos 
-        WHERE id = $1
-      `;
-      
-      const result = await pool.query(query, [id]);
-      return result.rows[0] || null;
-
-    } catch (error) {
-      throw error;
-    }
-  },
+  const client = await pool.connect();
+  try {
+    const {
+      creador_id,
+      deporte,
+      valor,
+      duracion,
+      lugar,
+      fecha,
+      hora,
+      lat,
+      lon,
+      roles
+    } = datos;
+    
+    const insertQuery = `
+      INSERT INTO spot.cupos (
+        creador_id, deporte, valor, duracion, lugar, 
+        fecha, hora, lat, lon, roles, estado
+      )
+      VALUES ($1, $2, $3, $4::interval, $5, $6, $7, $8, $9, $10, 'pendiente')
+      RETURNING *
+    `;
+    
+    const result = await client.query(insertQuery, [
+      creador_id,
+      deporte,
+      valor,
+      duracion, // Ya viene como "60 minutes"
+      lugar,
+      fecha,
+      hora,
+      lat,
+      lon,
+      JSON.stringify(roles)
+    ]);
+    
+    return result.rows[0];
+    
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
+},
 
 async obtenerParticipacionesCupo(cupoId) {
     try {
@@ -187,49 +170,47 @@ async buscarCupos(filtros, limite) {
     
     console.log('Buscar cupos con filtros validados:', filtros);
     
-    // Query base: solo cupos pendientes
+    // Obtener fecha y hora actual
+    const ahora = new Date();
+    const fechaHoy = ahora.toISOString().split('T')[0]; // YYYY-MM-DD
+    const horaActual = ahora.toTimeString().split(' ')[0]; // HH:MM:SS
+    
+    // Query base: solo cupos pendientes Y futuros
     let query = `
       SELECT 
         id, creador_id, deporte, valor, duracion, lugar, 
         fecha, hora, lat, lon, roles, creado_en, estado
       FROM spot.cupos 
       WHERE estado = 'pendiente'
+        AND (fecha > $1::date OR (fecha = $1::date AND hora > $2::time))
     `;
     
-    const valores = [];
-    let paramIndex = 1;
+    const valores = [fechaHoy, horaActual];
+    let paramIndex = 3;
     
-    // Filtro OBLIGATORIO por deporte
-    query += ` AND deporte = $${paramIndex++}`;
-    valores.push(deporte);
+    // Filtro EXACTO por deporte (si se proporciona)
+    if (deporte) {
+      query += ` AND deporte = $${paramIndex++}`;
+      valores.push(deporte);
+    }
     
-    // Filtro OPCIONAL por precio máximo
+    // Filtro menor o igual por precio (si se proporciona)
     if (precio !== null && precio !== undefined) {
       query += ` AND valor <= $${paramIndex++}`;
       valores.push(precio);
     }
     
-    // Filtros por fecha y/o hora (INDEPENDIENTES)
-    if (fecha && hora) {
-      // CASO 1: Fecha Y hora especificadas
-      // Mostrar cupos hasta esa fecha, y en cada día solo hasta esa hora
-      query += ` AND (fecha < $${paramIndex}::date OR (fecha = $${paramIndex + 1}::date AND hora <= $${paramIndex + 2}::time))`;
-      valores.push(fecha, fecha, hora);
-      paramIndex += 3;
-      
-    } else if (fecha) {
-      // CASO 2: Solo fecha especificada (sin importar si hora existe o no)
-      // Mostrar cupos hasta esa fecha, cualquier hora
-      query += ` AND fecha <= $${paramIndex++}::date`;
+    // Filtro EXACTO por fecha (si se proporciona)
+    if (fecha) {
+      query += ` AND fecha = $${paramIndex++}::date`;
       valores.push(fecha);
-      
-    } else if (hora) {
-      // CASO 3: Solo hora especificada (sin importar si fecha existe o no)
-      // Mostrar cupos hasta esa hora, cualquier fecha
-      query += ` AND hora <= $${paramIndex++}::time`;
+    }
+    
+    // Filtro EXACTO por hora (si se proporciona)
+    if (hora) {
+      query += ` AND hora = $${paramIndex++}::time`;
       valores.push(hora);
     }
-    // CASO 4: Ni fecha ni hora - muestra todos (sin filtro adicional)
     
     // Filtro OPCIONAL por ubicación (radio)
     if (ubicacion) {
@@ -250,8 +231,7 @@ async buscarCupos(filtros, limite) {
       paramIndex += 3;
     }
     
-    // Ordenar del más reciente al más distante (CORREGIDO)
-    // Primero los más próximos en el tiempo
+    // Ordenar por fecha y hora más próximas
     query += ` ORDER BY fecha ASC, hora ASC`;
     
     // Aplicar límite
