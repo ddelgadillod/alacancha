@@ -413,15 +413,15 @@ export async function buscarCupos(req, res) {
     }
     
     // ==========================================
-    // 5. VALIDACIÓN: PRECIO EXACTO (OPCIONAL)
+    // 5. VALIDACIÓN: PRECIO (OPCIONAL)
     // ==========================================
     
-    let precioExacto = null;
+    let precioMaximo = null;
     
     if (precio) {
-      precioExacto = parseFloat(precio);
+      precioMaximo = parseFloat(precio);
       
-      if (isNaN(precioExacto) || precioExacto < 0) {
+      if (isNaN(precioMaximo) || precioMaximo < 0) {
         return res.status(400).json({
           error: 'El precio debe ser un número positivo'
         });
@@ -512,7 +512,7 @@ export async function buscarCupos(req, res) {
     
     const filtros = {
       deporte: deporteNormalizado,
-      precio: precioExacto,
+      precio: precioMaximo,
       fecha: fechaExacta,
       hora: horaExacta,
       ubicacion: ubicacion
@@ -525,7 +525,7 @@ export async function buscarCupos(req, res) {
     const cupos = await Spot.buscarCupos(filtros, limiteNum);
     
     // ==========================================
-    // 11. RESPONDER CON RESULTADOS
+    // 11. RESPONDER CON RESULTADOS (ahora incluye creador_nombre)
     // ==========================================
     
     res.json({
@@ -534,7 +534,7 @@ export async function buscarCupos(req, res) {
       limite: limiteNum,
       filtros_aplicados: {
         deporte: deporteNormalizado,
-        precio: precioExacto,
+        precio_maximo: precioMaximo,
         fecha: fechaExacta,
         hora: horaExacta,
         ubicacion: ubicacion ? `${ubicacion.lat}, ${ubicacion.lon} (${ubicacion.radio_km}km)` : null

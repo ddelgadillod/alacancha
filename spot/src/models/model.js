@@ -175,14 +175,27 @@ async buscarCupos(filtros, limite) {
     const fechaHoy = ahora.toISOString().split('T')[0]; // YYYY-MM-DD
     const horaActual = ahora.toTimeString().split(' ')[0]; // HH:MM:SS
     
-    // Query base: solo cupos pendientes Y futuros
+    // Query base: solo cupos pendientes Y futuros CON JOIN a usuarios
     let query = `
       SELECT 
-        id, creador_id, deporte, valor, duracion, lugar, 
-        fecha, hora, lat, lon, roles, creado_en, estado
-      FROM spot.cupos 
-      WHERE estado = 'pendiente'
-        AND (fecha > $1::date OR (fecha = $1::date AND hora > $2::time))
+        c.id, 
+        c.creador_id, 
+        c.deporte, 
+        c.valor, 
+        c.duracion, 
+        c.lugar, 
+        c.fecha, 
+        c.hora, 
+        c.lat, 
+        c.lon, 
+        c.roles, 
+        c.creado_en, 
+        c.estado,
+        u.nombre AS creador_nombre
+      FROM spot.cupos c
+      INNER JOIN auth.usuarios u ON c.creador_id = u.id
+      WHERE c.estado = 'pendiente'
+        AND (c.fecha > $1::date OR (c.fecha = $1::date AND c.hora > $2::time))
     `;
     
     const valores = [fechaHoy, horaActual];
@@ -190,40 +203,40 @@ async buscarCupos(filtros, limite) {
     
     // Filtro EXACTO por deporte (si se proporciona)
     if (deporte) {
-      query += ` AND deporte = $${paramIndex++}`;
+      query += ` AND c.deporte = $${paramIndex++}`;
       valores.push(deporte);
     }
     
     // Filtro menor o igual por precio (si se proporciona)
     if (precio !== null && precio !== undefined) {
-      query += ` AND valor <= $${paramIndex++}`;
+      query += ` AND c.valor <= $${paramIndex++}`;
       valores.push(precio);
     }
     
     // Filtro EXACTO por fecha (si se proporciona)
     if (fecha) {
-      query += ` AND fecha = $${paramIndex++}::date`;
+      query += ` AND c.fecha = $${paramIndex++}::date`;
       valores.push(fecha);
     }
     
     // Filtro EXACTO por hora (si se proporciona)
     if (hora) {
-      query += ` AND hora = $${paramIndex++}::time`;
+      query += ` AND c.hora = $${paramIndex++}::time`;
       valores.push(hora);
     }
     
     // Filtro OPCIONAL por ubicación (radio)
     if (ubicacion) {
       query += ` 
-        AND lat IS NOT NULL 
-        AND lon IS NOT NULL
+        AND c.lat IS NOT NULL 
+        AND c.lon IS NOT NULL
         AND (
           6371 * acos(
             cos(radians($${paramIndex})) * 
-            cos(radians(lat)) * 
-            cos(radians(lon) - radians($${paramIndex + 1})) + 
+            cos(radians(c.lat)) * 
+            cos(radians(c.lon) - radians($${paramIndex + 1})) + 
             sin(radians($${paramIndex})) * 
-            sin(radians(lat))
+            sin(radians(c.lat))
           )
         ) <= $${paramIndex + 2}
       `;
@@ -232,7 +245,7 @@ async buscarCupos(filtros, limite) {
     }
     
     // Ordenar por fecha y hora más próximas
-    query += ` ORDER BY fecha ASC, hora ASC`;
+    query += ` ORDER BY c.fecha ASC, c.hora ASC`;
     
     // Aplicar límite
     query += ` LIMIT $${paramIndex}`;
