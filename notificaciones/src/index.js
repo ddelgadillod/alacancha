@@ -1,15 +1,35 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import authRoutes from './routes/routes.js';
-import './config/db.js'; // inicializa la conexión a la BD
+import cors from 'cors';
+import notifRoutes from './routes/routes.js';
+import './config/db.js';
 
-dotenv.config(); // lee .env
+dotenv.config();
 
 const app = express();
+
+// CORS para permitir peticiones desde el frontend
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://localhost:5500', '*'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Rutas del microservicio
-app.use('/api/auth', authRoutes);
+app.use('', notifRoutes);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Auth microservice running on port ${PORT}`));
+// Ruta de health check
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    service: 'notificaciones',
+    timestamp: new Date().toISOString()
+  });
+});
+
+const PORT = process.env.PORT || 3004;
+app.listen(PORT, () => {
+  console.log(`🔔 Notificaciones microservice running on port ${PORT}`);
+  console.log(`📡 VAPID configured: ${process.env.VAPID_PUBLIC_KEY ? 'Yes' : 'No'}`);
+});

@@ -1,17 +1,22 @@
 {
   "name": "notificaciones",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Servicio de notificaciones push para A la Cancha",
+  "type": "module",
+  "main": "src/index.js",
   "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "generate-vapid": "web-push generate-vapid-keys",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["push", "notifications", "webpush"],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "web-push": "^3.6.7"
   }
 }
