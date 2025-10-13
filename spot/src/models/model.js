@@ -107,23 +107,32 @@ const result = await pool.query(queryConfig);
       hora,
       lat,
       lon,
-      roles
+      roles,
+      cantidad
     } = datos;
+    
+    // Generar los VALUES dinámicamente según la cantidad
+    const valuesArray = [];
+    
+    for (let i = 0; i < cantidad; i++) {
+      valuesArray.push(`($1, $2, $3, $4::interval, $5, $6, $7, $8, $9, $10, 'pendiente')`);
+    }
     
     const insertQuery = `
       INSERT INTO spot.cupos (
         creador_id, deporte, valor, duracion, lugar, 
         fecha, hora, lat, lon, roles, estado
       )
-      VALUES ($1, $2, $3, $4::interval, $5, $6, $7, $8, $9, $10, 'pendiente')
+      VALUES ${valuesArray.join(', ')}
       RETURNING *
     `;
-    
+    console.log('Insert Query:', insertQuery);
+
     const result = await client.query(insertQuery, [
       creador_id,
       deporte,
       valor,
-      duracion, // Ya viene como "60 minutes"
+      duracion,
       lugar,
       fecha,
       hora,
@@ -132,9 +141,10 @@ const result = await pool.query(queryConfig);
       JSON.stringify(roles)
     ]);
     
-    return result.rows[0];
+    return result.rows;
     
   } catch (error) {
+    console.error('Error inserting cupos:', error);
     throw error;
   } finally {
     client.release();
@@ -215,13 +225,13 @@ async buscarCupos(filtros, limite) {
     
     // Filtro EXACTO por fecha (si se proporciona)
     if (fecha) {
-      query += ` AND c.fecha = $${paramIndex++}::date`;
+      query += ` AND c.fecha <= $${paramIndex++}::date`;
       valores.push(fecha);
     }
     
     // Filtro EXACTO por hora (si se proporciona)
     if (hora) {
-      query += ` AND c.hora = $${paramIndex++}::time`;
+      query += ` AND c.hora <= $${paramIndex++}::time`;
       valores.push(hora);
     }
     

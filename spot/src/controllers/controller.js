@@ -49,7 +49,8 @@ export async function crearCupo(req, res) {
       hora,
       lat,
       lon,
-      roles
+      roles,
+      cantidad
     } = req.body;
     
     // ==========================================
@@ -74,6 +75,12 @@ export async function crearCupo(req, res) {
       });
     }
     
+    if (cantidad === undefined || cantidad === null) {
+      return res.status(400).json({
+        error: 'La cantidad es obligatoria'
+      });
+    }
+
     if (!duracion) {
       return res.status(400).json({
         error: 'La duración es obligatoria'
@@ -138,6 +145,19 @@ export async function crearCupo(req, res) {
       });
     }
     
+    // Validar cantidad
+    const cantidadNum = parseInt(cantidad);
+    if (isNaN(cantidadNum) || cantidadNum <= 0) {
+      return res.status(400).json({
+        error: 'La cantidad debe ser un número entero positivo'
+      });
+    }
+    if (cantidadNum > 10) { // Máximo 10 cupos
+      return res.status(400).json({
+        error: 'La cantidad máxima es 10 cupos'
+      });
+    }
+
     // Validar fecha y hora
     const validacionFechaHora = validarFechaHora(fecha, hora);
     if (!validacionFechaHora.valido) {
@@ -254,7 +274,8 @@ export async function crearCupo(req, res) {
       hora,
       lat: latNum,
       lon: lonNum,
-      roles: rolesObj
+      roles: rolesObj,
+      cantidad: cantidadNum
     });
     
     // ==========================================
