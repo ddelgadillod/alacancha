@@ -1,30 +1,5 @@
 import Spot from '../models/model.js';
 
-async function enviarNotificacionesNuevoCupo(cupoData) {
-  try {
-    const API_NOTIF = process.env.NOTIF_SERVICE_URL || 'http://localhost:3004';
-    
-    const response = await fetch(`${API_NOTIF}/notificar-cupo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cupoData)
-    });
-
-    if (!response.ok) {
-      console.error('Error al enviar notificaciones:', await response.text());
-      return false;
-    }
-
-    const result = await response.json();
-    console.log(`Notificaciones enviadas: ${result.mensaje}`);
-    return true;
-
-  } catch (error) {
-    console.error('Error conectando con servicio de notificaciones:', error);
-    return false;
-  }
-}
-
 export async function findSpot(req, res) {
   const sport = req.body.sport || null;
     const value = req.body.value || null;
