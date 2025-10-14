@@ -1,5 +1,29 @@
 import Spot from '../models/model.js';
 
+async function enviarNotificacionesNuevoCupo(cupoData) {
+  try {
+    const API_NOTIF = process.env.NOTIF_SERVICE_URL || 'http://localhost:3004';
+    
+    const response = await fetch(`${API_NOTIF}/notificar-cupo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cupoData)
+    });
+
+    if (!response.ok) {
+      console.error('Error al enviar notificaciones:', await response.text());
+      return false;
+    }
+
+    const result = await response.json();
+    console.log(`Notificaciones enviadas: ${result.mensaje}`);
+    return true;
+
+  } catch (error) {
+    console.error('Error conectando con servicio de notificaciones:', error);
+    return false;
+  }
+}
 
 export async function findSpot(req, res) {
   const sport = req.body.sport || null;
@@ -277,6 +301,17 @@ export async function crearCupo(req, res) {
       roles: rolesObj,
       cantidad: cantidadNum
     });
+    const allUsers = await Spot.getAllUsers();
+    const usersToNotify = allUsers.filter(user => {
+      const deportes = user.deportes_preferidos.map(d => d.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+      return deportes.includes(deporteNormalizado);
+    });
+
+    for (const user of usersToNotify) {
+      console.log(`Notificar a ${user.correo} en endpoint ${user.endpoint}`);
+      await axios.post('http://notification-service.dev.svc.cluster.local:3000/prueba', { userId: user.id });
+    }
+
     
     // ==========================================
     // 5. RESPONDER
