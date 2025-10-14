@@ -14,6 +14,7 @@ export async function registerUser(req, res) {
 export async function loginUser(req, res) {
   const { username, password } = req.body;
   const user = await User.findByUsername(username);
+  console.log(user);
   if(user){
     const esValida = await bcrypt.compare(password, user["contraseña_hash"]);
     if (esValida) {

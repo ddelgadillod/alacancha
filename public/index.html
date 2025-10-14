@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10b981">
+  <title>A la Cancha - Notificaciones</title>
+  <link rel="manifest" href="/manifest.json">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .status-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+
+    .status-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+
+    .status-warning {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .user-info {
+      background: #f3f4f6;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .user-info p {
+      margin: 4px 0;
+      color: #4b5563;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚽ A la Cancha</h1>
+      <p>Sistema de Notificaciones Push</p>
+    </div>
+
+    <!-- Selección de Usuario -->
+    <div class="card">
+      <h2>1. Selecciona tu Usuario</h2>
+      <div class="form-group">
+        <label for="usuario">Usuario</label>
+        <select id="usuario">
+          <option value="">-- Selecciona un usuario --</option>
+        </select>
+      </div>
+      <div id="userInfo" class="user-info hidden"></div>
+      <button class="btn btn-success" id="btnSuscribir" disabled>
+        🔔 Activar Notificaciones
+      </button>
+      <div id="statusSuscripcion" class="hidden"></div>
+    </div>
+
+    <!-- Crear Cupo -->
+    <div class="card">
+      <h2>2. Crear Cupo de Prueba</h2>
+      <form id="formCupo">
+        <div class="form-group">
+          <label for="deporte">Deporte</label>
+          <select id="deporte" required>
+            <option value="futbol">⚽ Fútbol</option>
+            <option value="baloncesto">🏀 Baloncesto</option>
+            <option value="voleibol">🏐 Voleibol</option>
+          </select>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" required>
+          </div>
+          <div class="form-group">
+            <label for="hora">Hora</label>
+            <input type="time" id="hora" value="18:00" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lugar">Lugar</label>
+          <input type="text" id="lugar" placeholder="Ej: Cancha Municipal" required>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="valor">Valor ($)</label>
+            <input type="number" id="valor" value="20000" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="duracion">Duración (min)</label>
+            <input type="number" id="duracion" value="90" min="30" max="240" required>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="lat">Latitud</label>
+            <input type="number" id="lat" step="0.0001" placeholder="Ej: 3.4516">
+          </div>
+          <div class="form-group">
+            <label for="lon">Longitud</label>
+            <input type="number" id="lon" step="0.0001" placeholder="Ej: -76.532">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          ➕ Crear Cupo y Notificar
+        </button>
+      </form>
+      <div id="statusCupo" class="hidden"></div>
+    </div>
+
+    <!-- Prueba de Notificación -->
+    <div class="card">
+      <h2>3. Prueba de Notificación</h2>
+      <p style="color: #6b7280; margin-bottom: 16px;">
+        Envía una notificación de prueba al usuario seleccionado
+      </p>
+      <button class="btn btn-warning" id="btnPrueba" disabled>
+        🧪 Enviar Notificación de Prueba
+      </button>
+      <div id="statusPrueba" class="hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    // Configuración de API (ajusta estos valores)
+    const API_BASE = window.location.hostname === 'localhost' 
+      ? 'http://localhost' 
+      : 'https://tu-dominio.com';
+    
+    const API_AUTH = `${API_BASE}:3001`;
+    const API_SPOT = `${API_BASE}:3003`;
+    const API_NOTIF = `${API_BASE}:3004`;
+
+    let usuarioSeleccionado = null;
+
+    // Cargar usuarios al iniciar
+    async function cargarUsuarios() {
+      try {
+        // Simular carga de usuarios (en producción, harías un GET a /api/usuarios)
+        const usuarios = [
+          {id: 1, nombre: "Carlos Rodríguez", correo: "carlos.rodriguez@email.com", deportes_preferidos: ["futbol","baloncesto"], horario_disponible: ["tardes","noches"], lat: 3.4516, lon: -76.532},
+          {id: 2, nombre: "María González", correo: "maria.gonzalez@email.com", deportes_preferidos: ["voleibol","futbol"], horario_disponible: ["mañanas"], lat: 3.3751, lon: -76.5325},
+          {id: 3, nombre: "Andrés López", correo: "andres.lopez@email.com", deportes_preferidos: ["futbol"], horario_disponible: ["fines de semana"], lat: 3.4738, lon: -76.5326},
+          {id: 4, nombre: "Diana Herrera", correo: "diana.herrera@email.com", deportes_preferidos: ["baloncesto","voleibol"], horario_disponible: ["tardes"], lat: 3.4899, lon: -76.5014},
+          {id: 6, nombre: "Ana Torres", correo: "ana.torres@email.com", deportes_preferidos: ["futbol","baloncesto"], horario_disponible: ["tardes"], lat: 4.6097, lon: -74.0817}
+        ];
+
+        const select = document.getElementById('usuario');
+        usuarios.forEach(u => {
+          const option = document.createElement('option');
+          option.value = JSON.stringify(u);
+          option.textContent = `${u.nombre} (${u.correo})`;
+          select.appendChild(option);
+        });
+
+      } catch (error) {
+        console.error('Error cargando usuarios:', error);
+      }
+    }
+
+    // Manejar selección de usuario
+    document.getElementById('usuario').addEventListener('change', (e) => {
+      if (e.target.value) {
+        usuarioSeleccionado = JSON.parse(e.target.value);
+        mostrarInfoUsuario(usuarioSeleccionado);
+        document.getElementById('btnSuscribir').disabled = false;
+        document.getElementById('btnPrueba').disabled = false;
+      } else {
+        usuarioSeleccionado = null;
+        document.getElementById('userInfo').classList.add('hidden');
+        document.getElementById('btnSuscribir').disabled = true;
+        document.getElementById('btnPrueba').disabled = true;
+      }
+    });
+
+    function mostrarInfoUsuario(usuario) {
+      const info = document.getElementById('userInfo');
+      info.innerHTML = `
+        <p><strong>Deportes:</strong> ${usuario.deportes_preferidos.join(', ')}</p>
+        <p><strong>Horarios:</strong> ${usuario.horario_disponible.join(', ') || 'No especificado'}</p>
+        <p><strong>Ubicación:</strong> ${usuario.lat && usuario.lon ? `${usuario.lat}, ${usuario.lon}` : 'No especificada'}</p>
+      `;
+      info.classList.remove('hidden');
+    }
+
+    // Suscribir a notificaciones push
+    document.getElementById('btnSuscribir').addEventListener('click', async () => {
+      if (!usuarioSeleccionado) return;
+
+      const btn = document.getElementById('btnSuscribir');
+      const status = document.getElementById('statusSuscripcion');
+      
+      btn.disabled = true;
+      btn.textContent = 'Activando...';
+
+      try {
+        // Verificar soporte de notificaciones
+        if (!('Notification' in window)) {
+          throw new Error('Este navegador no soporta notificaciones');
+        }
+
+        if (!('serviceWorker' in navigator)) {
+          throw new Error('Este navegador no soporta Service Workers');
+        }
+
+        // Pedir permiso
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          throw new Error('Permiso de notificaciones denegado');
+        }
+
+        // Registrar service worker
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.ready;
+
+        // Obtener clave pública VAPID
+        const vapidResponse = await fetch(`${API_NOTIF}/vapid-public-key`);
+        const { publicKey } = await vapidResponse.json();
+
+        // Suscribirse
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
+
+        // Guardar suscripción en el servidor
+        const response = await fetch(`${API_NOTIF}/suscribir`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            usuarioId: usuarioSeleccionado.id,
+            suscripcion: subscription.toJSON()
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          mostrarStatus(status, 'success', '✅ Notificaciones activadas correctamente');
+          btn.textContent = '✓ Notificaciones Activas';
+        } else {
+          throw new Error(result.error);
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarStatus(status, 'error', `❌ Error: ${error.message}`);
+        btn.disabled = false;
+        btn.textContent = '🔔 Activar Notificaciones';
+      }
+    });
+
+    // Crear cupo
+    document.getElementById('formCupo').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const status = document.getElementById('statusCupo');
+      const btn = e.target.querySelector('button[type="submit"]');
+      
+      btn.disabled = true;
+      btn.textContent = 'Creando...';
+
+      try {
+        const cupoData = {
+          creador_id: usuarioSeleccionado?.id || 1,
+          deporte: document.getElementById('deporte').value,
+          valor: parseFloat(document.getElementById('valor').value),
+          duracion: parseInt(document.getElementById('duracion').value),
+          lugar: document.getElementById('lugar').value,
+          fecha: document.getElementById('fecha').value,
+          hora: document.getElementById('hora').value,
+          lat: parseFloat(document.getElementById('lat').value) || null,
+          lon: parseFloat(document.getElementById('lon').value) || null,
+          roles: { jugador: 10 }
+        };
+
+        // Crear cupo
+        const response = await fetch(`${API_SPOT}/crearcupos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cupoData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Enviar notificaciones
+          await fetch(`${API_NOTIF}/notificar-cupo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...result.cupo,
+              id: result.cupo.id
+            })
+          });
+
+          mostrarStatus(status, 'success', '✅ Cupo creado y notificaciones enviadas');
+          e.target.reset();
+          document.getElementById('fecha').valueAsDate = new Date(Date.now() + 86400000);
+        } else {
+          throw new Error(result.error);
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarStatus(status, 'error', `❌ Error: ${error.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '➕ Crear Cupo y Notificar';
+      }
+    });
+
+    // Enviar notificación de prueba
+    document.getElementById('btnPrueba').addEventListener('click', async () => {
+      if (!usuarioSeleccionado) return;
+
+      const btn = document.getElementById('btnPrueba');
+      const status = document.getElementById('statusPrueba');
+      
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const response = await fetch(`${API_NOTIF}/prueba`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuarioId: usuarioSeleccionado.id })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          mostrarStatus(status, 'success', '✅ Notificación de prueba enviada');
+        } else {
+          throw new Error(result.error);
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarStatus(status, 'error', `❌ Error: ${error.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🧪 Enviar Notificación de Prueba';
+      }
+    });
+
+    function mostrarStatus(elemento, tipo, mensaje) {
+      elemento.className = `status status-${tipo}`;
+      elemento.textContent = mensaje;
+      elemento.classList.remove('hidden');
+      
+      setTimeout(() => {
+        elemento.classList.add('hidden');
+      }, 5000);
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    // Inicializar
+    cargarUsuarios();
+    
+    // Establecer fecha mínima (mañana)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('fecha').valueAsDate = tomorrow;
+    document.getElementById('fecha').min = tomorrow.toISOString().split('T')[0];
+  </script>
+</body>
+</html>
