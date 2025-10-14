@@ -175,7 +175,8 @@ async buscarCupos(filtros, limite) {
       precio,
       fecha,
       hora,
-      ubicacion
+      ubicacion,
+      userId
     } = filtros;
     
     console.log('Buscar cupos con filtros validados:', filtros);
@@ -204,7 +205,7 @@ async buscarCupos(filtros, limite) {
         u.nombre AS creador_nombre
       FROM spot.cupos c
       INNER JOIN auth.usuarios u ON c.creador_id = u.id
-      WHERE c.estado = 'pendiente'
+      WHERE c.estado = 'pendiente' ${userId !== undefined? `AND c.creador_id <> ${userId}` : ''}
         AND (c.fecha > $1::date OR (c.fecha = $1::date AND c.hora > $2::time))
     `;
     

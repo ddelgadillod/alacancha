@@ -382,6 +382,7 @@ export async function buscarCupos(req, res) {
     const lon = req.query.lon;
     const radio = req.query.radio;
     const limite = req.query.limite || 10;
+    const userId = req.query.userId;
     
     // ==========================================
     // 2. VALIDACIÓN: AL MENOS UN CRITERIO OBLIGATORIO
@@ -536,7 +537,8 @@ export async function buscarCupos(req, res) {
       precio: precioMaximo,
       fecha: fechaExacta,
       hora: horaExacta,
-      ubicacion: ubicacion
+      ubicacion: ubicacion,
+      userId: userId
     };
     
     // ==========================================
