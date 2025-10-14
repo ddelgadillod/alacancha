@@ -60,7 +60,7 @@ const Notificacion = {
         paramIndex++;
       }
       
-      // Filtro por ubicación (20km de radio)
+      // Filtro por ubicación (15km de radio)
       if (lat && lon) {
         query += `
           AND u.lat IS NOT NULL 
@@ -73,7 +73,7 @@ const Notificacion = {
               sin(radians($${paramIndex})) * 
               sin(radians(u.lat))
             )
-          ) <= 20
+          ) <= 15
         `;
         valores.push(lat, lon);
         paramIndex += 2;

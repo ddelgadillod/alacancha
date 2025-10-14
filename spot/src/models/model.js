@@ -1,6 +1,7 @@
 import pool from '../config/db.js';
 
 
+
 const Spot = {
   async find(sport, value, date) {
   const queryConfig = {
@@ -328,6 +329,18 @@ async buscarCupos(filtros, limite) {
     }
   },
 
+  async getAllUsers() {
+    try {
+      const query = `
+        SELECT id,correo,deportes_preferidos FROM auth.usuarios;
+      `;
+      const result = await pool.query(query);
+      return result.rows;
+
+    } catch (error) {
+      throw error;
+    }
+  },
 
 
 };

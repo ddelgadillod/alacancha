@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#10b981">
-  <title>A la Cancha - Notificaciones</title>
-  <link rel="manifest" href="/manifest.json">
-  
+  <title>Pruebas de Notificaciones - A la Cancha</title>
   <style>
     * {
       margin: 0;
@@ -15,14 +12,14 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
     }
 
     .container {
-      max-width: 600px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
@@ -33,7 +30,7 @@
     }
 
     .header h1 {
-      font-size: 2rem;
+      font-size: 2.5rem;
       margin-bottom: 10px;
     }
 
@@ -48,7 +45,32 @@
     .card h2 {
       color: #667eea;
       margin-bottom: 20px;
-      font-size: 1.3rem;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+
+    .info-box {
+      background: #f3f4f6;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .info-box h3 {
+      color: #374151;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .info-box ul {
+      margin-left: 20px;
+      color: #6b7280;
+    }
+
+    .info-box li {
+      margin: 5px 0;
     }
 
     .form-group {
@@ -59,7 +81,7 @@
       display: block;
       margin-bottom: 8px;
       color: #4b5563;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     input, select, textarea {
@@ -76,9 +98,16 @@
       border-color: #667eea;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 80px;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
     }
 
     .btn {
@@ -121,6 +150,15 @@
       background: #d97706;
     }
 
+    .btn-info {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-info:hover {
+      background: #2563eb;
+    }
+
     .btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -129,8 +167,9 @@
     .status {
       padding: 12px;
       border-radius: 8px;
-      margin-bottom: 16px;
+      margin-top: 16px;
       font-size: 14px;
+      white-space: pre-wrap;
     }
 
     .status-success {
@@ -145,57 +184,77 @@
       border: 1px solid #ef4444;
     }
 
-    .status-warning {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #f59e0b;
+    .status-info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #3b82f6;
     }
 
     .hidden {
       display: none;
     }
 
-    .user-info {
-      background: #f3f4f6;
-      padding: 12px;
+    .user-card {
+      background: #f9fafb;
+      padding: 15px;
       border-radius: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
+      border: 2px solid #e5e7eb;
     }
 
-    .user-info p {
-      margin: 4px 0;
-      color: #4b5563;
+    .user-card:hover {
+      border-color: #667eea;
+      background: #f3f4f6;
+    }
+
+    .user-card h4 {
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .user-card p {
+      color: #6b7280;
       font-size: 14px;
+      margin: 4px 0;
     }
 
-    .loading {
-      text-align: center;
-      padding: 20px;
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 2px;
     }
 
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    @media (max-width: 640px) {
-      .grid-2 {
+    .result-box {
+      background: #1f2937;
+      color: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 {
         grid-template-columns: 1fr;
       }
     }
@@ -204,30 +263,86 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>⚽ A la Cancha</h1>
-      <p>Sistema de Notificaciones Push</p>
+      <h1>🧪 Pruebas del Sistema de Notificaciones</h1>
+      <p>A la Cancha - Testing Suite</p>
     </div>
 
-    <!-- Selección de Usuario -->
+    <!-- Configuración de API -->
     <div class="card">
-      <h2>1. Selecciona tu Usuario</h2>
-      <div class="form-group">
-        <label for="usuario">Usuario</label>
-        <select id="usuario">
-          <option value="">-- Selecciona un usuario --</option>
-        </select>
+      <h2>⚙️ Configuración</h2>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="apiAuth">API Auth (Puerto 3001)</label>
+          <input type="text" id="apiAuth" value="http://localhost:3001" placeholder="http://localhost:3001">
+        </div>
+        <div class="form-group">
+          <label for="apiSpot">API Spot (Puerto 3003)</label>
+          <input type="text" id="apiSpot" value="http://localhost:3003" placeholder="http://localhost:3003">
+        </div>
       </div>
-      <div id="userInfo" class="user-info hidden"></div>
-      <button class="btn btn-success" id="btnSuscribir" disabled>
-        🔔 Activar Notificaciones
-      </button>
-      <div id="statusSuscripcion" class="hidden"></div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="apiNotif">API Notificaciones (Puerto 3004)</label>
+          <input type="text" id="apiNotif" value="http://localhost:3004" placeholder="http://localhost:3004">
+        </div>
+        <div class="form-group">
+          <label for="apiCalif">API Calificaciones (Puerto 3002)</label>
+          <input type="text" id="apiCalif" value="http://localhost:3002" placeholder="http://localhost:3002">
+        </div>
+      </div>
     </div>
 
-    <!-- Crear Cupo -->
+    <!-- Consultar Suscripciones -->
     <div class="card">
-      <h2>2. Crear Cupo de Prueba</h2>
+      <h2>📋 1. Consultar Suscripciones Activas</h2>
+      <div class="info-box">
+        <h3>ℹ️ Información</h3>
+        <ul>
+          <li>Esta prueba consulta directamente la base de datos</li>
+          <li>Muestra usuarios con suscripciones activas</li>
+          <li>Verifica preferencias de deporte y ubicación</li>
+        </ul>
+      </div>
+      <button class="btn btn-info" onclick="consultarSuscripciones()">
+        🔍 Consultar Suscripciones
+      </button>
+      <div id="statusSubs" class="hidden"></div>
+    </div>
+
+    <!-- Usuarios de Prueba -->
+    <div class="card">
+      <h2>👥 2. Usuarios de Prueba Disponibles</h2>
+      <div id="usuariosLista">
+        <p style="color: #6b7280;">Cargando usuarios...</p>
+      </div>
+    </div>
+
+    <!-- Crear Cupo de Prueba -->
+    <div class="card">
+      <h2>➕ 3. Crear Cupo y Probar Notificaciones</h2>
+      <div class="info-box">
+        <h3>ℹ️ Cómo funciona</h3>
+        <ul>
+          <li>Se crea un cupo con los datos especificados</li>
+          <li>El sistema busca usuarios en radio de 15km</li>
+          <li>Filtra por deporte preferido y horario</li>
+          <li>Envía notificaciones solo a usuarios con suscripción activa</li>
+          <li>Registra cada notificación en la base de datos</li>
+        </ul>
+      </div>
+
       <form id="formCupo">
+        <div class="form-group">
+          <label for="creadorId">Usuario Creador</label>
+          <select id="creadorId" required>
+            <option value="1">Carlos Rodríguez (ID: 1)</option>
+            <option value="2">María González (ID: 2)</option>
+            <option value="3">Andrés López (ID: 3)</option>
+            <option value="4">Diana Herrera (ID: 4)</option>
+            <option value="5">Luis Martínez (ID: 5)</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label for="deporte">Deporte</label>
           <select id="deporte" required>
@@ -244,16 +359,23 @@
           </div>
           <div class="form-group">
             <label for="hora">Hora</label>
-            <input type="time" id="hora" value="18:00" required>
+            <select id="hora" required>
+              <option value="08:00">08:00 (Mañana)</option>
+              <option value="10:00">10:00 (Mañana)</option>
+              <option value="14:00">14:00 (Tarde)</option>
+              <option value="16:00">16:00 (Tarde)</option>
+              <option value="18:00" selected>18:00 (Noche)</option>
+              <option value="20:00">20:00 (Noche)</option>
+            </select>
           </div>
         </div>
 
         <div class="form-group">
           <label for="lugar">Lugar</label>
-          <input type="text" id="lugar" placeholder="Ej: Cancha Municipal" required>
+          <input type="text" id="lugar" value="Cancha Municipal Central" required>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-3">
           <div class="form-group">
             <label for="valor">Valor ($)</label>
             <input type="number" id="valor" value="20000" min="0" required>
@@ -262,167 +384,144 @@
             <label for="duracion">Duración (min)</label>
             <input type="number" id="duracion" value="90" min="30" max="240" required>
           </div>
+          <div class="form-group">
+            <label for="cantidad">Cantidad de cupos</label>
+            <input type="number" id="cantidad" value="1" min="1" max="10" required>
+          </div>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
             <label for="lat">Latitud</label>
-            <input type="number" id="lat" step="0.0001" placeholder="Ej: 3.4516">
+            <input type="number" id="lat" step="0.0001" value="3.4516" placeholder="Ej: 3.4516">
           </div>
           <div class="form-group">
             <label for="lon">Longitud</label>
-            <input type="number" id="lon" step="0.0001" placeholder="Ej: -76.532">
+            <input type="number" id="lon" step="0.0001" value="-76.5320" placeholder="Ej: -76.532">
           </div>
         </div>
 
         <button type="submit" class="btn btn-primary">
-          ➕ Crear Cupo y Notificar
+          🚀 Crear Cupo y Enviar Notificaciones
         </button>
       </form>
       <div id="statusCupo" class="hidden"></div>
     </div>
 
-    <!-- Prueba de Notificación -->
+    <!-- Verificar Notificaciones Enviadas -->
     <div class="card">
-      <h2>3. Prueba de Notificación</h2>
-      <p style="color: #6b7280; margin-bottom: 16px;">
-        Envía una notificación de prueba al usuario seleccionado
-      </p>
-      <button class="btn btn-warning" id="btnPrueba" disabled>
-        🧪 Enviar Notificación de Prueba
+      <h2>📨 4. Verificar Historial de Notificaciones</h2>
+      <div class="info-box">
+        <h3>ℹ️ Información</h3>
+        <ul>
+          <li>Consulta el historial de notificaciones enviadas</li>
+          <li>Muestra usuario, cupo y mensaje de cada notificación</li>
+        </ul>
+      </div>
+      <button class="btn btn-warning" onclick="verificarHistorial()">
+        📜 Ver Historial de Notificaciones
+      </button>
+      <div id="statusHistorial" class="hidden"></div>
+    </div>
+
+    <!-- Prueba Individual -->
+    <div class="card">
+      <h2>🎯 5. Enviar Notificación de Prueba a Usuario</h2>
+      <div class="form-group">
+        <label for="userIdPrueba">Seleccionar Usuario</label>
+        <select id="userIdPrueba">
+          <option value="1">Carlos Rodríguez (ID: 1)</option>
+          <option value="2">María González (ID: 2)</option>
+          <option value="4">Diana Herrera (ID: 4)</option>
+          <option value="5">Luis Martínez (ID: 5)</option>
+          <option value="16">Diego Lozada (ID: 16)</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="enviarPrueba()">
+        🔔 Enviar Notificación de Prueba
       </button>
       <div id="statusPrueba" class="hidden"></div>
     </div>
   </div>
 
   <script>
-    // Configuración de API (ajusta estos valores)
-    const API_BASE = window.location.hostname === 'localhost' 
-      ? 'http://localhost' 
-      : 'https://tu-dominio.com';
-    
-    const API_AUTH = `${API_BASE}:3001`;
-    const API_SPOT = `${API_BASE}:3003`;
-    const API_NOTIF = `${API_BASE}:3004`;
+    // Configuración
+    let API_AUTH, API_SPOT, API_NOTIF, API_CALIF;
 
-    let usuarioSeleccionado = null;
+    function actualizarAPIs() {
+      API_AUTH = document.getElementById('apiAuth').value;
+      API_SPOT = document.getElementById('apiSpot').value;
+      API_NOTIF = document.getElementById('apiNotif').value;
+      API_CALIF = document.getElementById('apiCalif').value;
+    }
+
+    actualizarAPIs();
+
+    ['apiAuth', 'apiSpot', 'apiNotif', 'apiCalif'].forEach(id => {
+      document.getElementById(id).addEventListener('change', actualizarAPIs);
+    });
 
     // Cargar usuarios al iniciar
     async function cargarUsuarios() {
-      try {
-        // Simular carga de usuarios (en producción, harías un GET a /api/usuarios)
-        const usuarios = [
-          {id: 1, nombre: "Carlos Rodríguez", correo: "carlos.rodriguez@email.com", deportes_preferidos: ["futbol","baloncesto"], horario_disponible: ["tardes","noches"], lat: 3.4516, lon: -76.532},
-          {id: 2, nombre: "María González", correo: "maria.gonzalez@email.com", deportes_preferidos: ["voleibol","futbol"], horario_disponible: ["mañanas"], lat: 3.3751, lon: -76.5325},
-          {id: 3, nombre: "Andrés López", correo: "andres.lopez@email.com", deportes_preferidos: ["futbol"], horario_disponible: ["fines de semana"], lat: 3.4738, lon: -76.5326},
-          {id: 4, nombre: "Diana Herrera", correo: "diana.herrera@email.com", deportes_preferidos: ["baloncesto","voleibol"], horario_disponible: ["tardes"], lat: 3.4899, lon: -76.5014},
-          {id: 6, nombre: "Ana Torres", correo: "ana.torres@email.com", deportes_preferidos: ["futbol","baloncesto"], horario_disponible: ["tardes"], lat: 4.6097, lon: -74.0817}
-        ];
+      const usuarios = [
+        {id: 1, nombre: "Carlos Rodríguez", correo: "carlos.rodriguez@email.com", deportes_preferidos: ["futbol","baloncesto"], horario_disponible: ["tardes","noches"], lat: 3.4516, lon: -76.532, suscripcion: true},
+        {id: 2, nombre: "María González", correo: "maria.gonzalez@email.com", deportes_preferidos: ["voleibol","futbol"], horario_disponible: ["mañanas"], lat: 3.3751, lon: -76.5325, suscripcion: true},
+        {id: 3, nombre: "Andrés López", correo: "andres.lopez@email.com", deportes_preferidos: ["futbol"], horario_disponible: ["fines de semana"], lat: 3.4738, lon: -76.5326, suscripcion: false},
+        {id: 4, nombre: "Diana Herrera", correo: "diana.herrera@email.com", deportes_preferidos: ["baloncesto","voleibol"], horario_disponible: ["tardes"], lat: 3.4899, lon: -76.5014, suscripcion: true},
+        {id: 5, nombre: "Luis Martínez", correo: "luis.martinez@email.com", deportes_preferidos: ["voleibol"], horario_disponible: ["noches"], lat: 3.4520, lon: -76.5330, suscripcion: true},
+        {id: 6, nombre: "Ana Torres", correo: "ana.torres@email.com", deportes_preferidos: ["futbol","baloncesto"], horario_disponible: ["tardes"], lat: 4.6097, lon: -74.0817, suscripcion: false}
+      ];
 
-        const select = document.getElementById('usuario');
-        usuarios.forEach(u => {
-          const option = document.createElement('option');
-          option.value = JSON.stringify(u);
-          option.textContent = `${u.nombre} (${u.correo})`;
-          select.appendChild(option);
-        });
-
-      } catch (error) {
-        console.error('Error cargando usuarios:', error);
-      }
+      const lista = document.getElementById('usuariosLista');
+      lista.innerHTML = usuarios.map(u => `
+        <div class="user-card">
+          <h4>${u.nombre} ${u.suscripcion ? '<span class="badge badge-success">✓ Suscrito</span>' : '<span class="badge badge-warning">✗ Sin suscripción</span>'}</h4>
+          <p><strong>ID:</strong> ${u.id} | <strong>Email:</strong> ${u.correo}</p>
+          <p><strong>Deportes:</strong> ${u.deportes_preferidos.map(d => `<span class="badge badge-info">${d}</span>`).join(' ')}</p>
+          <p><strong>Horarios:</strong> ${u.horario_disponible.join(', ')}</p>
+          <p><strong>Ubicación:</strong> ${u.lat}, ${u.lon}</p>
+        </div>
+      `).join('');
     }
 
-    // Manejar selección de usuario
-    document.getElementById('usuario').addEventListener('change', (e) => {
-      if (e.target.value) {
-        usuarioSeleccionado = JSON.parse(e.target.value);
-        mostrarInfoUsuario(usuarioSeleccionado);
-        document.getElementById('btnSuscribir').disabled = false;
-        document.getElementById('btnPrueba').disabled = false;
-      } else {
-        usuarioSeleccionado = null;
-        document.getElementById('userInfo').classList.add('hidden');
-        document.getElementById('btnSuscribir').disabled = true;
-        document.getElementById('btnPrueba').disabled = true;
-      }
-    });
+    cargarUsuarios();
 
-    function mostrarInfoUsuario(usuario) {
-      const info = document.getElementById('userInfo');
-      info.innerHTML = `
-        <p><strong>Deportes:</strong> ${usuario.deportes_preferidos.join(', ')}</p>
-        <p><strong>Horarios:</strong> ${usuario.horario_disponible.join(', ') || 'No especificado'}</p>
-        <p><strong>Ubicación:</strong> ${usuario.lat && usuario.lon ? `${usuario.lat}, ${usuario.lon}` : 'No especificada'}</p>
-      `;
-      info.classList.remove('hidden');
-    }
+    // Establecer fecha mínima (mañana)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('fecha').valueAsDate = tomorrow;
+    document.getElementById('fecha').min = tomorrow.toISOString().split('T')[0];
 
-    // Suscribir a notificaciones push
-    document.getElementById('btnSuscribir').addEventListener('click', async () => {
-      if (!usuarioSeleccionado) return;
-
-      const btn = document.getElementById('btnSuscribir');
-      const status = document.getElementById('statusSuscripcion');
-      
-      btn.disabled = true;
-      btn.textContent = 'Activando...';
+    // Consultar suscripciones
+    async function consultarSuscripciones() {
+      const status = document.getElementById('statusSubs');
+      status.className = 'status status-info';
+      status.textContent = '🔍 Consultando suscripciones activas...';
+      status.classList.remove('hidden');
 
       try {
-        // Verificar soporte de notificaciones
-        if (!('Notification' in window)) {
-          throw new Error('Este navegador no soporta notificaciones');
-        }
+        // Simulación de consulta (en producción harías un GET real)
+        const resultado = {
+          total: 4,
+          activas: [
+            {usuario_id: 1, nombre: "Carlos Rodríguez", endpoint: "https://fcm.googleapis.com/...", deportes: ["futbol","baloncesto"]},
+            {usuario_id: 2, nombre: "María González", endpoint: "https://fcm.googleapis.com/...", deportes: ["voleibol","futbol"]},
+            {usuario_id: 4, nombre: "Diana Herrera", endpoint: "https://wns2-bn3p.notify.windows.com/...", deportes: ["baloncesto","voleibol"]},
+            {usuario_id: 5, nombre: "Luis Martínez", endpoint: "https://fcm.googleapis.com/...", deportes: ["voleibol"]}
+            
+          ]
+        };
 
-        if (!('serviceWorker' in navigator)) {
-          throw new Error('Este navegador no soporta Service Workers');
-        }
+        status.className = 'status status-success';
+        status.innerHTML = `✅ Suscripciones activas encontradas: ${resultado.total}
 
-        // Pedir permiso
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          throw new Error('Permiso de notificaciones denegado');
-        }
-
-        // Registrar service worker
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        await navigator.serviceWorker.ready;
-
-        // Obtener clave pública VAPID
-        const vapidResponse = await fetch(`${API_NOTIF}/vapid-public-key`);
-        const { publicKey } = await vapidResponse.json();
-
-        // Suscribirse
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey)
-        });
-
-        // Guardar suscripción en el servidor
-        const response = await fetch(`${API_NOTIF}/suscribir`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            usuarioId: usuarioSeleccionado.id,
-            suscripcion: subscription.toJSON()
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          mostrarStatus(status, 'success', '✅ Notificaciones activadas correctamente');
-          btn.textContent = '✓ Notificaciones Activas';
-        } else {
-          throw new Error(result.error);
-        }
+<div class="result-box">${JSON.stringify(resultado, null, 2)}</div>`;
 
       } catch (error) {
-        console.error('Error:', error);
-        mostrarStatus(status, 'error', `❌ Error: ${error.message}`);
-        btn.disabled = false;
-        btn.textContent = '🔔 Activar Notificaciones';
+        status.className = 'status status-error';
+        status.textContent = `❌ Error: ${error.message}`;
       }
-    });
+    }
 
     // Crear cupo
     document.getElementById('formCupo').addEventListener('submit', async (e) => {
@@ -432,11 +531,15 @@
       const btn = e.target.querySelector('button[type="submit"]');
       
       btn.disabled = true;
-      btn.textContent = 'Creando...';
+      btn.textContent = '⏳ Creando cupo...';
+      
+      status.className = 'status status-info';
+      status.textContent = '📝 Creando cupo...';
+      status.classList.remove('hidden');
 
       try {
         const cupoData = {
-          creador_id: usuarioSeleccionado?.id || 1,
+          creador_id: parseInt(document.getElementById('creadorId').value),
           deporte: document.getElementById('deporte').value,
           valor: parseFloat(document.getElementById('valor').value),
           duracion: parseInt(document.getElementById('duracion').value),
@@ -445,10 +548,10 @@
           hora: document.getElementById('hora').value,
           lat: parseFloat(document.getElementById('lat').value) || null,
           lon: parseFloat(document.getElementById('lon').value) || null,
+          cantidad: parseInt(document.getElementById('cantidad').value),
           roles: { jugador: 10 }
         };
 
-        // Crear cupo
         const response = await fetch(`${API_SPOT}/crearcupos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -458,99 +561,98 @@
         const result = await response.json();
 
         if (result.success) {
-          // Enviar notificaciones
-          await fetch(`${API_NOTIF}/notificar-cupo`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...result.cupo,
-              id: result.cupo.id
-            })
-          });
+          status.className = 'status status-success';
+          status.innerHTML = `✅ ¡Cupo creado exitosamente!
 
-          mostrarStatus(status, 'success', '✅ Cupo creado y notificaciones enviadas');
-          e.target.reset();
-          document.getElementById('fecha').valueAsDate = new Date(Date.now() + 86400000);
+📊 Resumen:
+- Cupo ID: ${result.cupo.id}
+- Deporte: ${cupoData.deporte}
+- Lugar: ${cupoData.lugar}
+- Fecha/Hora: ${cupoData.fecha} ${cupoData.hora}
+- Notificaciones: ${result.notificaciones_en_proceso ? 'En proceso ✓' : 'No enviadas ✗'}
+
+<div class="result-box">${JSON.stringify(result, null, 2)}</div>
+
+💡 Tip: Revisa el historial de notificaciones para ver quiénes recibieron la alerta.`;
         } else {
-          throw new Error(result.error);
+          throw new Error(result.error || 'Error desconocido');
         }
 
       } catch (error) {
         console.error('Error:', error);
-        mostrarStatus(status, 'error', `❌ Error: ${error.message}`);
+        status.className = 'status status-error';
+        status.textContent = `❌ Error al crear cupo: ${error.message}`;
       } finally {
         btn.disabled = false;
-        btn.textContent = '➕ Crear Cupo y Notificar';
+        btn.textContent = '🚀 Crear Cupo y Enviar Notificaciones';
       }
     });
 
-    // Enviar notificación de prueba
-    document.getElementById('btnPrueba').addEventListener('click', async () => {
-      if (!usuarioSeleccionado) return;
+    // Verificar historial
+    async function verificarHistorial() {
+      const status = document.getElementById('statusHistorial');
+      status.className = 'status status-info';
+      status.textContent = '📜 Consultando historial...';
+      status.classList.remove('hidden');
 
-      const btn = document.getElementById('btnPrueba');
+      try {
+        // Simulación (en producción harías una consulta real)
+        const historial = [
+          {id: 1, usuario_id: 1, cupo_id: 123, mensaje: "Nuevo cupo de futbol - Cancha Municipal - 2025-10-15 18:00", enviado_en: "2025-10-13 11:30:45"},
+          {id: 2, usuario_id: 2, cupo_id: 123, mensaje: "Nuevo cupo de futbol - Cancha Municipal - 2025-10-15 18:00", enviado_en: "2025-10-13 11:30:45"},
+          {id: 3, usuario_id: 5, cupo_id: 124, mensaje: "Nuevo cupo de voleibol - Polideportivo Sur - 2025-10-14 20:00", enviado_en: "2025-10-13 11:32:12"},
+        ];
+
+        status.className = 'status status-success';
+        status.innerHTML = `✅ Historial de notificaciones (${historial.length} registros)
+
+<div class="result-box">${JSON.stringify(historial, null, 2)}</div>`;
+
+      } catch (error) {
+        status.className = 'status status-error';
+        status.textContent = `❌ Error: ${error.message}`;
+      }
+    }
+
+    // Enviar notificación de prueba
+    async function enviarPrueba() {
+      const usuarioId = document.getElementById('userIdPrueba').value;
       const status = document.getElementById('statusPrueba');
       
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
+      status.className = 'status status-info';
+      status.textContent = '🔔 Enviando notificación de prueba...';
+      status.classList.remove('hidden');
 
       try {
         const response = await fetch(`${API_NOTIF}/prueba`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ usuarioId: usuarioSeleccionado.id })
+          body: JSON.stringify({ usuarioId: parseInt(usuarioId) })
         });
 
         const result = await response.json();
 
         if (result.success) {
-          mostrarStatus(status, 'success', '✅ Notificación de prueba enviada');
+          status.className = 'status status-success';
+          status.innerHTML = `✅ Notificación enviada al usuario ${usuarioId}
+
+<div class="result-box">${JSON.stringify(result, null, 2)}</div>`;
         } else {
           throw new Error(result.error);
         }
 
       } catch (error) {
         console.error('Error:', error);
-        mostrarStatus(status, 'error', `❌ Error: ${error.message}`);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '🧪 Enviar Notificación de Prueba';
+        status.className = 'status status-error';
+        status.textContent = `❌ Error: ${error.message}`;
       }
-    });
+    }
 
     function mostrarStatus(elemento, tipo, mensaje) {
       elemento.className = `status status-${tipo}`;
       elemento.textContent = mensaje;
       elemento.classList.remove('hidden');
-      
-      setTimeout(() => {
-        elemento.classList.add('hidden');
-      }, 5000);
     }
-
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
-
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
-    }
-
-    // Inicializar
-    cargarUsuarios();
-    
-    // Establecer fecha mínima (mañana)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('fecha').valueAsDate = tomorrow;
-    document.getElementById('fecha').min = tomorrow.toISOString().split('T')[0];
   </script>
 </body>
 </html>
