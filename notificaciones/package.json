@@ -10,7 +10,11 @@
     "generate-vapid": "web-push generate-vapid-keys",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["push", "notifications", "webpush"],
+  "keywords": [
+    "push",
+    "notifications",
+    "webpush"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

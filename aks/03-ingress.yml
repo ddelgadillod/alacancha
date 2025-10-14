@@ -43,3 +43,10 @@ spec:
             name: calification-service
             port:
               number: 3000
+      - path: /api/notification/(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 3000

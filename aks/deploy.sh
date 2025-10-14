@@ -18,3 +18,10 @@ VERSION=latest
 IMAGE=acralacancha.azurecr.io/$SERVICE:$VERSION
 docker build -t $IMAGE ../calificacion/
 docker push $IMAGE
+
+#notificaciones
+SERVICE=notification
+VERSION=latest
+IMAGE=acralacancha.azurecr.io/$SERVICE:$VERSION
+docker build -t $IMAGE ../notificaciones/
+docker push $IMAGE

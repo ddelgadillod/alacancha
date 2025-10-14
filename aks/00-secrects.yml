@@ -6,3 +6,5 @@ metadata:
 type: Opaque
 stringData:
   DB_PASSWORD: "Manhole-Struck-Femur-Dreaded9"
+  VAPID_PUBLIC_KEY: "BDV8IYMU-0w5MLn8XjrHe13P2zEHjtT7AgZA6R3BdFPHLOU68RFEz360KDfoTK5ME2NJwps63N2240cL8v2diGI"
+  VAPID_PRIVATE_KEY: "YCxGHxW71h4SGX-XGdOjHQoT03zFznlz9VchBh-wG-s"
