@@ -332,7 +332,7 @@ async buscarCupos(filtros, limite) {
   async getAllUsers() {
     try {
       const query = `
-        SELECT id,correo,deportes_preferidos FROM auth.usuarios;
+        SELECT auth.usuarios.id,correo,deportes_preferidos FROM notificaciones.suscripciones LEFT JOIN auth.usuarios ON notificaciones.suscripciones.usuario_id = auth.usuarios.id;
       `;
       const result = await pool.query(query);
       return result.rows;

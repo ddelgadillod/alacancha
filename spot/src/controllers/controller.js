@@ -1,4 +1,6 @@
 import Spot from '../models/model.js';
+import axios from 'axios';
+
 
 export async function findSpot(req, res) {
   const sport = req.body.sport || null;
@@ -283,8 +285,8 @@ export async function crearCupo(req, res) {
     });
 
     for (const user of usersToNotify) {
-      console.log(`Notificar a ${user.correo} en endpoint ${user.endpoint}`);
-      await axios.post('http://notification-service.dev.svc.cluster.local:3000/prueba', { userId: user.id });
+      console.log(`Notificar a ${user.correo}`);
+      await axios.post('http://notification-service.dev.svc.cluster.local:3000/prueba', { usuarioId: user.id });
     }
 
     
